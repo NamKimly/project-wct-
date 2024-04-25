@@ -4,7 +4,7 @@ export default function Header() {
 		<>
 			<div className="flex justify-between items-center m-12 px-4 ">
 				<div className="header-title ">
-					<h1 className="text-xl font-bold font-sans"> Electronic Store </h1>
+					<h1 className="text-2xl font-bold font-sans"> Electronic Store </h1>
 				</div>
 
 				<div className="header-nav flex justify-center items-center gap-20">

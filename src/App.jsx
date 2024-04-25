@@ -13,8 +13,7 @@ export default function App() {
 					<Route path="/shopping" element={<Shopping />} />
 					<Route path="*" element={<PageNotFound />} />
 				</Route>
-				
-				
+
 				<Route path="/admin" element={<Admin />} />
 			</Routes>
 		</Router>
