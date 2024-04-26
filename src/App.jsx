@@ -10,7 +10,7 @@ export default function App() {
 			<Routes>
 				<Route element={<AppLayout />}>
 					<Route path="/" element={<Home />} />
-					<Route path="/shop" element={<Shopping />} />
+					<Route path="/shop	" element={<Shopping />} />
 					<Route path="*" element={<PageNotFound />} />
 				</Route>
 
