@@ -306,14 +306,6 @@ const ProductsList = ({ product }) => {
 								className="max-w-48 object-cover object-center lg:h-3/4 transition-transform duration-300 transform hover:scale-105 cursor-pointer"
 							/>
 						</div>
-
-						<div className="absolute bg-red-500 w-20 h-8 rounded-md flex justify-center items-center m-3">
-							<p className="text-white text-sm">50% OFF</p>
-						</div>
-						{/* Uncomment the new arrival tag */}
-						{/* <div className="absolute bg-emerald-500 w-24 h-8 rounded-md flex justify-center items-center m-3">
-							<p className="text-white text-sm">New Arrival</p>
-						</div> */}
 					</div>
 
 					<div className="p-6">

@@ -1,11 +1,16 @@
 import { useState } from "react";
 import { Dialog, Popover } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import Cart from "./../components/Cart";
 import { Link } from "react-router-dom";
 
 export default function Navbar() {
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+	const [openCart, setOpenCart] = useState(false);
 
+	const handleCart = () => {
+		setOpenCart(!openCart);
+	};
 	return (
 		<header className="navbar bg-white  mb-8">
 			<nav
@@ -43,9 +48,11 @@ export default function Navbar() {
 					<a href="#" className="text-sm font-semibold leading-6 text-black">
 						About
 					</a>
-					<a href="#" className="text-sm font-semibold leading-6 text-black">
+					<Link
+						to={"/contact"}
+						className="text-sm font-semibold leading-6 text-black">
 						Contact
-					</a>
+					</Link>
 					<div className="relative">
 						<div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
 							<svg
@@ -66,15 +73,22 @@ export default function Navbar() {
 						<input
 							type="search"
 							id="default-search"
-							className="block w-full p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+							className="block w-full p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-100 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
 							placeholder="Search..."
 							required
 						/>
 					</div>
 					<div className="flex justify-center items-center gap-12">
 						<a href="#" className="text-sm font-semibold leading-6 text-black">
-							<i className="fa-solid fa-cart-shopping text-lg "></i>
+							<i
+								onClick={handleCart}
+								className="fa-solid fa-cart-shopping text-lg "></i>
 						</a>
+						{openCart && (
+							<>
+								<Cart />
+							</>
+						)}
 						<Link
 							to={"/login"}
 							className="text-md leading-6 flex justify-center items-center gap-4 text-black">
@@ -82,11 +96,12 @@ export default function Navbar() {
 							Log in
 						</Link>
 
-						<button
+						<Link
+							to={"/signup"}
 							type="button"
 							className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
 							Sign Up
-						</button>
+						</Link>
 					</div>
 				</Popover.Group>
 			</nav>

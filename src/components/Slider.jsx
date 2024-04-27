@@ -22,7 +22,7 @@ export default function Slider({ slides }) {
 	};
 
 	return (
-		<div className="max-w-screen-lg mx-auto h-[450px] w-3/4 m-auto py-16 relative group">
+		<div className="max-w-screen-lg mx-auto h-[450px] w-3/4 m-auto py-16 relative group rounded-lg">
 			{slides.map((slide, index) => (
 				<div
 					key={index}
@@ -33,7 +33,7 @@ export default function Slider({ slides }) {
 						opacity: currentIndex === index ? 1 : 0,
 					}}>
 					<img
-						src={slide.url}
+						src={slide.images[0].image2}
 						alt={`Slide ${index}`}
 						className="w-full h-full object-cover rounded-lg"
 					/>
