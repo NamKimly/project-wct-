@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import { product } from "../../data/mock-data";
+import { Link } from "react-router-dom";
 
 console.log(typeof product);
 const SideBar = () => {
@@ -324,7 +325,9 @@ const ProductsList = ({ product }) => {
 						</button>
 						<div className="flex justify-center items-center gap-4">
 							<i className="far fa-heart cursor-pointer md:text-sm"></i>
-							<i className="fas fa-eye text-black cursor-pointer md:text-sm"></i>
+							<Link to={"/productdetail"}>
+								<i className="fas fa-eye text-black cursor-pointer md:text-sm"></i>
+							</Link>
 						</div>
 					</div>
 				</div>

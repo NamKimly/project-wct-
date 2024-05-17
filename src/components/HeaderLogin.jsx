@@ -1,10 +1,51 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, Popover } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Link } from "react-router-dom";
+import Cart from "./../components/Cart";
+import { logout } from "./../app/slice";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { getCurrentUser } from "./../app/slice";
 
-export default function Navbar() {
+export default function HeaderLogin() {
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+	const [openCart, setOpenCart] = useState(false);
+	const [isOpen, setIsOpen] = useState(false);
+	const navigate = useNavigate();
+	const dispatch = useDispatch();
+	// Access currentUser from the auth slice via token
+	const currentUser = useSelector((state) => state.user.currentUser);
+
+	useEffect(() => {
+		dispatch(getCurrentUser());
+	}, [dispatch]);
+
+	const toggleDropdown = () => {
+		setIsOpen(!isOpen);
+	};
+
+	const handleCart = () => {
+		setOpenCart(!openCart);
+	};
+	/**
+	 *
+	 * If the token is expired return to login page
+	 *
+	 * **/
+	useEffect(() => {
+		const user_token = localStorage.getItem("token");
+		console.log(user_token);
+
+		if (!user_token) {
+			navigate("/login");
+		} else {
+			const tokenExpirationTimeout = setTimeout(() => {
+				localStorage.removeItem("token");
+			}, 3600000);
+			// Store the timeout ID in localStorage for future reference
+			localStorage.setItem("tokenExpirationTimeout", tokenExpirationTimeout);
+		}
+	}, [navigate]);
 
 	return (
 		<header className="navbar bg-white  mb-8">
@@ -48,7 +89,7 @@ export default function Navbar() {
 						className="text-sm font-semibold leading-6 text-black">
 						Contact
 					</Link>
-					<div className="relative w-80">
+					<div className="relative w-96">
 						<div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
 							<svg
 								className="w-4 h-4 text-gray-500 dark:text-gray-400"
@@ -73,20 +114,39 @@ export default function Navbar() {
 							required
 						/>
 					</div>
-					<div className="flex justify-center items-center gap-12">
-						<Link
-							to={"/login"}
-							className="text-md leading-6 flex justify-center items-center gap-4 text-black">
-							<i className="fa-solid fa-user text-lg"></i>
-							Log in
-						</Link>
-
-						<Link
-							to={"/signup"}
-							type="button"
-							className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
-							Sign Up
-						</Link>
+					<div className="flex justify-center items-center">
+						<a href="#" className="text-sm font-semibold leading-6 text-black">
+							<i
+								onClick={handleCart}
+								className="fa-solid fa-cart-shopping text-lg "></i>
+						</a>
+						{openCart && (
+							<>
+								<Cart />
+							</>
+						)}
+					</div>
+					<div className="flex justify-center items-center">
+						<div className="relative">
+							<img
+								className="h-8 w-8 rounded-full object-cover cursor-pointer"
+								src={
+									currentUser.avatar
+										? currentUser.avatar
+										: "https://static-00.iconduck.com/assets.00/user-avatar-icon-512x512-vufpcmdn.png"
+								}
+								alt="*"
+								onClick={toggleDropdown}
+							/>
+							{isOpen && <DropdownIcons isOpen={isOpen} />}
+							<div className="absolute  rounded-full shadow-inner"></div>
+						</div>
+						<div className="ml-4">
+							<h2 className="font-bold text-gray-800 text-sm">
+								{currentUser.name}
+							</h2>
+							<p className="text-sm text-gray-600">Client</p>
+						</div>
 					</div>
 				</Popover.Group>
 			</nav>
@@ -151,15 +211,10 @@ export default function Navbar() {
 								</a>
 							</div>
 							<div className=" flex justify-start items-start gap-8">
-								<a
-									href="#"
-									className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-white">
-									Log in
-								</a>
 								<button
 									type="button"
 									className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
-									Sign Up
+									Log Out
 								</button>
 							</div>
 						</div>
@@ -167,5 +222,55 @@ export default function Navbar() {
 				</Dialog.Panel>
 			</Dialog>
 		</header>
+	);
+}
+
+// eslint-disable-next-line react/prop-types
+function DropdownIcons({ isOpen }) {
+	const dispatch = useDispatch();
+	const navigate = useNavigate();
+
+	const handleLogOut = () => {
+		dispatch(logout());
+		localStorage.removeItem("token");
+		localStorage.removeItem("expires_in");
+
+		navigate("/");
+		console.log("logout");
+		window.location.reload();
+	};
+
+	return (
+		<div className="absolute z-50 flex items-center justify-center">
+			<div className="w-52">
+				<div
+					id="dropdown-menu"
+					className={`absolute flex  justify-start items-start  flex-col mt-2.5 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 p-1 space-y-1 ${
+						isOpen ? "" : "hidden"
+					}`}>
+					{/* Dropdown content goes here */}
+					<a
+						href="#"
+						className="block w-full text-sm mt-2 px-5 py-2 text-gray-700 hover:bg-gray-100 active:bg-blue-100 cursor-pointer rounded-md">
+						My Profile
+					</a>
+					<a
+						href="#"
+						className="block w-full text-sm px-5 py-2 text-gray-700 hover:bg-gray-100 active:bg-blue-100 cursor-pointer rounded-md">
+						Shopping Cart
+					</a>
+
+					<div className="flex justify-center items-center p-2">
+						<button
+							onClick={handleLogOut}
+							type="button"
+							className="flex justify-center items-center gap-2 focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
+							<i className="fa-solid fa-arrow-right-from-bracket"></i>
+							Log Out
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
 	);
 }

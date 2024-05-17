@@ -33,6 +33,7 @@ export default function Slider({ slides }) {
 						opacity: currentIndex === index ? 1 : 0,
 					}}>
 					<img
+						loading="lazy"
 						src={slide.images[0].image2}
 						alt={`Slide ${index}`}
 						className="w-full h-full object-cover rounded-lg"

@@ -6,10 +6,17 @@ import Shopping from "./views/pages/Shopping";
 import PageNotFound from "./components/PageNotFound";
 import Contact from "./views/pages/Contact";
 import Admin from "./views/pages/admin/Admin";
-import SignUp from "./views/pages/SignUp";
-import SignIn from "./views/pages/SignIn";
+import SignUp from "./views/pages/auth/SignUp";
+import SignIn from "./views/pages/auth/SignIn";
 import Cart from "./components/Cart";
 import Payment from "./views/pages/Payment";
+import GoogleLogin from "./views/pages/auth/GoogleLogin";
+import FacebookLogin from "./views/pages/auth/FacebookLogin";
+import DashBoard from "./views/pages/admin/DashBoard";
+import ApproveOrder from "./views/pages/admin/ApproveOrder";
+import ProductCrud from "./views/pages/admin/ProductCrud";
+import AdminProfile from "./views/pages/admin/AdminProfile";
+import AddingCategory from "./views/pages/admin/AddingCategory";
 
 export default function App() {
 	return (
@@ -25,9 +32,18 @@ export default function App() {
 				</Route>
 
 				<Route path="/login" element={<SignIn />} />
-				<Route path="/cart" element={<Cart />} />
+				<Route path="/auth/google" element={<GoogleLogin />} />
+				<Route path="/auth/facebook" element={<FacebookLogin />} />
 				<Route path="/signup" element={<SignUp />} />
-				<Route path="/admin" element={<Admin />} />
+
+				<Route path="/cart" element={<Cart />} />
+				<Route path="/admin" element={<Admin />}>
+					<Route path="/admin/dashboard" element={<DashBoard />} />
+					<Route path="/admin/approve_order" element={<ApproveOrder />} />
+					<Route path="/admin/product_crud" element={<ProductCrud />} />
+					<Route path="/admin/profile" element={<AdminProfile />} />
+					<Route path="/admin/add_category" element={<AddingCategory />} />
+				</Route>
 			</Routes>
 		</Router>
 	);

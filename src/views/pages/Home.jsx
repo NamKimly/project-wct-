@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import Slider from "../../components/Slider";
 import oven from "./../../assets/oven.png";
 import iron from "./../../assets/iron.png";
@@ -83,9 +82,6 @@ const CategoryCarosouel = ({ product }) => {
 						</li>
 						<li>
 							<a href="#">Personal Care</a>
-						</li>
-						<li>
-							<a href="#">Other</a>
 						</li>
 					</ul>
 				</div>
@@ -261,7 +257,6 @@ export default function Home() {
 	return (
 		<>
 			<CategoryCarosouel product={product} />
-
 			<div className="lex flex-col justify-center items-center">
 				{/** Filter Popular  */}
 				<ProductListing

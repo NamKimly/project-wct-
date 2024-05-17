@@ -104,13 +104,14 @@ export default function ProductDetail() {
 									powerful performance, offering convenient cooking options for
 									your kitchen. With advanced technology and intuitive controls,
 									it delivers quick and even heating for your favorite dishes.
-									Whether you're defrosting, reheating, or cooking from scratch,
-									this microwave is your versatile culinary companion.
+									Whether you are defrosting, reheating, or cooking from
+									scratch, this microwave is your versatile culinary companion.
 								</p>
 							</div>
 
 							<div className="mt-10 flex flex-col items-start justify-start gap-8 space-y-4 border-t border-b py-4 sm:flex-row sm:space-y-0">
-								<button
+								<Link
+									to={"/payment"}
 									type="button"
 									className="inline-flex items-center justify-center rounded-md border-2 border-transparent bg-gray-900 bg-none px-12 py-3 text-center text-base font-bold text-white transition-all duration-200 ease-in-out focus:shadow hover:bg-gray-800">
 									<svg
@@ -127,7 +128,7 @@ export default function ProductDetail() {
 										/>
 									</svg>
 									Buy Now
-								</button>
+								</Link>
 								<button
 									type="button"
 									className="inline-flex items-center justify-center rounded-md border-2 border-transparent bg-gray-900 bg-none px-12 py-3 text-center text-base font-bold text-white transition-all duration-200 ease-in-out focus:shadow hover:bg-gray-800">
