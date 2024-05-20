@@ -84,9 +84,16 @@ export default function SignIn() {
 		/** Dispatch the action of login */
 		dispatch(loginUser(userCredentials)).then((action) => {
 			if (action.payload) {
+				const userRole = action.payload.role;
+				if (userRole === "admin") {
+					console.log(`This is ${userRole}: `);
+					navigate("/admin/dashboard");
+				} else {
+					console.log(`This is ${userRole}: `);
+					navigate("/");
+				}
 				setCredential("");
 				setPassword("");
-				navigate("/");
 			}
 		});
 	};

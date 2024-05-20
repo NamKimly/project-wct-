@@ -1,8 +1,11 @@
+/* eslint-disable react/prop-types */
+
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { storage } from "./../../../firebase/firebase";
 import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 import { v4 } from "uuid";
+import Pagination from "../../../components/Pagination";
 
 /**
  *
@@ -11,6 +14,7 @@ import { v4 } from "uuid";
 
 const AddProductModal = ({ updateProduct, closeModal }) => {
 	const [getCategory, setGetCategory] = useState([]);
+	const [getBrand, setGetBrand] = useState([]);
 
 	/** Posting Products field */
 	const [productName, setProductName] = useState("");
@@ -21,10 +25,10 @@ const AddProductModal = ({ updateProduct, closeModal }) => {
 	/**Images Hosting Handling  */
 	const [productImages, setProductImages] = useState(null);
 	const [photoURL, setPhotoURL] = useState(null);
+	const [file, setFile] = useState(null);
 	/** */
 
 	const [productDescription, setProductDescription] = useState("");
-	const [file, setFile] = useState(null);
 	const metadata = {
 		contentType: "image/*",
 	};
@@ -42,6 +46,19 @@ const AddProductModal = ({ updateProduct, closeModal }) => {
 			}
 		};
 		fetchCategory();
+	}, []);
+
+	// Fetching brands in database
+	useEffect(() => {
+		const fetchBrand = async () => {
+			try {
+				const brand = await axios.get(`${import.meta.env.VITE_API_URL}/brand`);
+				setGetBrand(brand.data.brand);
+			} catch (e) {
+				console.log(e.message);
+			}
+		};
+		fetchBrand();
 	}, []);
 
 	const handlePostingProducts = async (e) => {
@@ -64,7 +81,6 @@ const AddProductModal = ({ updateProduct, closeModal }) => {
 			},
 			(error) => {
 				console.error("Error uploading image:", error);
-				// Handle error if necessary
 			},
 			async () => {
 				try {
@@ -78,7 +94,7 @@ const AddProductModal = ({ updateProduct, closeModal }) => {
 					const credentials = {
 						name: productName,
 						category_id: productCategory,
-						brand: productBrand,
+						brand_id: productBrand,
 						price: productPrice,
 						images: downloadURL,
 						description: productDescription,
@@ -166,18 +182,25 @@ const AddProductModal = ({ updateProduct, closeModal }) => {
 						</div>
 
 						<div className=" w-full flex justify-between items-center gap-4 ">
-							<div className="mb-4 w-1/2">
+							<div className="w-1/2 mb-4">
 								<label
-									htmlFor="brand"
+									htmlFor="category"
 									className="block text-gray-700 text-sm font-bold mb-2">
 									Brand
 								</label>
-								<input
-									type="text"
-									name="brand"
+								<select
 									onChange={(e) => setProductBrand(e.target.value)}
-									className="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500"
-								/>
+									className="bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+									<option disabled selected>
+										Select Brand
+									</option>
+									{getBrand &&
+										getBrand.map((data, key) => (
+											<option key={key} value={data.id}>
+												{data.name}
+											</option>
+										))}
+								</select>
 							</div>
 							<div className="w-1/2 mb-4">
 								<label
@@ -274,6 +297,9 @@ const AddProductModal = ({ updateProduct, closeModal }) => {
 
 const EditProductModal = ({ updateProduct, closeModal, id }) => {
 	const [getCategory, setGetCategory] = useState([]);
+	const [getBrand, setGetBrand] = useState([]);
+
+	/** */
 	const [productName, setProductName] = useState("");
 	const [productBrand, setProductBrand] = useState("");
 	const [productCategory, setProductCategory] = useState(null);
@@ -282,7 +308,6 @@ const EditProductModal = ({ updateProduct, closeModal, id }) => {
 	const [productDescription, setProductDescription] = useState("");
 	const [file, setFile] = useState(null);
 	const metadata = { contentType: "image/*" };
-	console.log(typeof id);
 
 	// Fetching categories in database
 	useEffect(() => {
@@ -299,6 +324,19 @@ const EditProductModal = ({ updateProduct, closeModal, id }) => {
 		fetchCategory();
 	}, []);
 
+	// Fetching brands in database
+	useEffect(() => {
+		const fetchBrand = async () => {
+			try {
+				const brand = await axios.get(`${import.meta.env.VITE_API_URL}/brand`);
+				setGetBrand(brand.data.brand);
+			} catch (e) {
+				console.log(e.message);
+			}
+		};
+		fetchBrand();
+	}, []);
+
 	useEffect(() => {
 		const fetchProductByID = async () => {
 			try {
@@ -307,7 +345,7 @@ const EditProductModal = ({ updateProduct, closeModal, id }) => {
 				);
 				const product = response.data.product;
 				setProductName(product.name);
-				setProductBrand(product.brand);
+				setProductBrand(product.brand_id);
 				setProductCategory(product.category_id);
 				setProductPrice(product.price);
 				setFile(product.images);
@@ -318,7 +356,6 @@ const EditProductModal = ({ updateProduct, closeModal, id }) => {
 		};
 		fetchProductByID();
 	}, [id]);
-	console.log(productImages);
 
 	const handleEditingProducts = async (e) => {
 		e.preventDefault();
@@ -326,7 +363,7 @@ const EditProductModal = ({ updateProduct, closeModal, id }) => {
 		const updateProductData = async (downloadURL) => {
 			const updatedProduct = {
 				name: productName,
-				brand: productBrand,
+				brand_id: productBrand,
 				category_id: productCategory,
 				price: productPrice,
 				images: downloadURL || file,
@@ -435,19 +472,24 @@ const EditProductModal = ({ updateProduct, closeModal, id }) => {
 						</div>
 					</div>
 					<div className="w-full flex justify-between items-center gap-4">
-						<div className="mb-4 w-1/2">
+						<div className="w-1/2 mb-4">
 							<label
-								htmlFor="brand"
+								htmlFor="category"
 								className="block text-gray-700 text-sm font-bold mb-2">
 								Brand
 							</label>
-							<input
-								type="text"
-								name="brand"
+							<select
 								value={productBrand}
 								onChange={(e) => setProductBrand(e.target.value)}
-								className="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500"
-							/>
+								className="bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+								<option disabled>Select Category</option>
+								{getBrand &&
+									getBrand.map((data, key) => (
+										<option key={key} value={data.id}>
+											{data.name}
+										</option>
+									))}
+							</select>
 						</div>
 						<div className="w-1/2 mb-4">
 							<label
@@ -603,48 +645,61 @@ const DeleteModal = ({ updateProduct, closeModal, id }) => {
 };
 
 export default function ProductCrud() {
-	// Modal
+	//* Pagination  /
+	const [currentPage, setCurrentPage] = useState(1);
+	const [postPerPage, setPostPerPage] = useState(10);
+	const lastPostIndex = currentPage * postPerPage;
+	const firstPostIndex = lastPostIndex - postPerPage;
+
+	//* Modal
 	const [modalState, setModalState] = useState({
 		isOpen: false,
 		showModal: false,
 		showModalEdit: false,
 	});
 
-	// Storing Items
+	//* Storing Items
 	const [itemsCategory, setItemsCategory] = useState([]);
 
-	// Get id from each item
+	//*Get id from each item
 	const [getId, setGetId] = useState(null);
 	const [itemsCategoryID, setItemsCategoryID] = useState(null);
+	const [itemsBrandID, setItemsBrandID] = useState(null);
 
 	const [searchQuery, setSearchQuery] = useState("");
 	const [getCategory, setGetCategory] = useState([]);
+	const [getBrand, setGetBrand] = useState([]);
 
-	// Filter product by name of products
-	const filteredProducts = itemsCategory.filter((product) =>
+	//* Pagination of product
+	const currentPost = itemsCategory.slice(firstPostIndex, lastPostIndex);
+	console.log(currentPost);
+
+	//* Filter product by name of products
+	const filteredProducts = currentPost.filter((product) =>
 		product.name.toLowerCase().includes(searchQuery.toLowerCase())
 	);
 
-	// Fetching product by Category
-	const fetchProductsByCategory = async (categoryID) => {
+	//* Fetching product by Category
+	const fetchProductsByCategory = async (categoryID, brandID) => {
 		try {
-			if (categoryID === null) {
-				// If no category is selected, fetch all products
-				const response = await axios.get(
-					`${import.meta.env.VITE_API_URL}/products`
-				);
-				setItemsCategory(response.data.product);
+			let url = `${import.meta.env.VITE_API_URL}/products`;
+
+			// If either categoryID or brandID is provided, use the query-categories endpoint
+			if (categoryID || brandID) {
+				url = `${import.meta.env.VITE_API_URL}/query-categories`;
+			}
+
+			const response = await axios.get(url, {
+				params: {
+					category_id: categoryID ? parseInt(categoryID) : null,
+					brand_id: brandID ? parseInt(brandID) : null,
+				},
+			});
+
+			if (categoryID || brandID) {
+				setItemsCategory(response.data.category); // Adjust based on your actual API response structure
 			} else {
-				// If a category is selected, fetch products by category
-				const response = await axios.get(
-					`${import.meta.env.VITE_API_URL}/query-categories`,
-					{
-						params: {
-							category_id: parseInt(categoryID),
-						},
-					}
-				);
-				setItemsCategory(response.data.product);
+				setItemsCategory(response.data.product); // Adjust based on your actual API response structure
 			}
 		} catch (error) {
 			console.error("Error fetching products:", error.message);
@@ -652,8 +707,8 @@ export default function ProductCrud() {
 	};
 
 	useEffect(() => {
-		fetchProductsByCategory(itemsCategoryID);
-	}, [itemsCategoryID]);
+		fetchProductsByCategory(itemsCategoryID, itemsBrandID);
+	}, [itemsCategoryID, itemsBrandID]);
 	/**  */
 
 	// Fetching categories in database
@@ -670,7 +725,19 @@ export default function ProductCrud() {
 		};
 		fetchCategory();
 	}, []);
-	console.log(getCategory);
+
+	// Fetching brands in database
+	useEffect(() => {
+		const fetchBrand = async () => {
+			try {
+				const brand = await axios.get(`${import.meta.env.VITE_API_URL}/brand`);
+				setGetBrand(brand.data.brand);
+			} catch (e) {
+				console.log(e.message);
+			}
+		};
+		fetchBrand();
+	}, []);
 
 	/**
 	 *
@@ -681,7 +748,8 @@ export default function ProductCrud() {
 	const toggleModal = (type, isOpen) => {
 		setModalState((prevState) => ({ ...prevState, [type]: isOpen }));
 	};
-
+	console.log(itemsCategory.length);
+	console.log(postPerPage);
 	return (
 		<>
 			{modalState.isOpen && (
@@ -705,34 +773,35 @@ export default function ProductCrud() {
 				/>
 			)}
 
-			<div className="flex flex-col items-center justify-center  bg-white">
-				<div className="flex justify-between mt-4 items-center gap-52 w-full">
-					<div className="w-1/4 p-4">
-						<input
-							className=" border  border-gray-300 hover:border-gray-400 transition-colors rounded-md w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:ring-purple-600 focus:border-purple-600 focus:shadow-outline"
-							type="text"
-							placeholder="Search..."
-							value={searchQuery}
-							onChange={(e) => setSearchQuery(e.target.value)}
-						/>
-					</div>
+			<div className="flex flex-col items-center justify-center bg-white">
+				<div className="flex justify-between mt-4 items-center w-full">
+					<input
+						className=" border border-gray-300 hover:border-gray-400 transition-colors rounded-md w-1/4 p-2 m-4 text-gray-800 leading-tight focus:outline-none focus:ring-purple-600 focus:border-purple-600 focus:shadow-outline"
+						type="text"
+						placeholder="Search..."
+						value={searchQuery}
+						onChange={(e) => setSearchQuery(e.target.value)}
+					/>
 
-					<div className="flex">
-						<button
-							onClick={() => toggleModal("isOpen", true)}
-							className="flex justify-center items-center gap-2 bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 mr-4 rounded text-sm">
-							<i className="fa-solid fa-plus"></i>
-							Add Product
-						</button>
+					<button
+						onClick={() => toggleModal("isOpen", true)}
+						className="flex justify-center items-center gap-2 bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 w-1/8 h-full mr-4 rounded text-sm">
+						<i className="fa-solid fa-plus"></i>
+						Add Product
+					</button>
 
-						{/** If there no param selected then it will go to the fetch all items  */}
+					{/** If there no param selected then it will go to the fetch all items  */}
+				</div>
+				<div className="flex flex-col p-4 w-full h-full gap-8 ">
+					<div className="flex justify-center w-1/2  items-center gap-4">
+						<label>Category</label>
 						<select
 							onChange={(e) =>
 								setItemsCategoryID(
 									e.target.value === "" ? null : e.target.value
 								)
 							}
-							className="bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-1/2 p-2.5">
+							className="bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
 							<option value="">All</option>
 							{getCategory &&
 								getCategory.map((data, key) => (
@@ -741,9 +810,23 @@ export default function ProductCrud() {
 									</option>
 								))}
 						</select>
+
+						<label>Brand</label>
+
+						<select
+							onChange={(e) =>
+								setItemsBrandID(e.target.value === "" ? null : e.target.value)
+							}
+							className="bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
+							<option value="">All</option>
+							{getBrand &&
+								getBrand.map((data, key) => (
+									<option key={key} value={data.id}>
+										{data.name}
+									</option>
+								))}
+						</select>
 					</div>
-				</div>
-				<div className="p-4 w-full h-full ">
 					<table className="w-full max-w-screen table-auto text-left">
 						<thead className="bg-slate-200">
 							<tr>
@@ -808,7 +891,7 @@ export default function ProductCrud() {
 										</td>
 										<td className="p-4 border-b border-blue-gray-50">
 											<p className="block antialiased font-sans text-sm leading-normal text-blue-gray-900 font-normal">
-												{products.brand}
+												{products.brand ? products.brand.name : "No brand"}
 											</p>
 										</td>
 										<td className="p-4 border-b border-blue-gray-50">
@@ -869,6 +952,14 @@ export default function ProductCrud() {
 							)}
 						</tbody>
 					</table>
+					<div className="flex justify-end items-end mr-4">
+						<Pagination
+							totalPosts={itemsCategory.length}
+							postsPerPage={postPerPage}
+							setCurrentPage={setCurrentPage}
+							currentPage={currentPage}
+						/>
+					</div>
 				</div>
 			</div>
 		</>

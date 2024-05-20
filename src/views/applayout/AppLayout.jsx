@@ -8,7 +8,9 @@ import { getCurrentUser } from "./../../app/slice";
 
 export default function AppLayout() {
 	const dispatch = useDispatch();
-	const currentUser = useSelector((state) => state.user.currentUser); // Access currentUser from the auth slice
+	const currentUser = useSelector((state) => state.user.currentUser);
+	// Access currentUser from the auth slice
+
 	console.log(currentUser);
 	useEffect(() => {
 		dispatch(getCurrentUser());

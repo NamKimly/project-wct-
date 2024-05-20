@@ -1,6 +1,16 @@
 import { Outlet, Link } from "react-router-dom";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getCurrentUser } from "./../../../app/slice";
 
 function Admin() {
+	//* Get Admin Information
+	const dispatch = useDispatch();
+	const currentUser = useSelector((state) => state.user.currentUser);
+	// Access currentUser from the auth slice
+	useEffect(() => {
+		dispatch(getCurrentUser());
+	}, [dispatch]);
 	return (
 		<>
 			<div className="flex">
@@ -17,13 +27,8 @@ function Admin() {
 							</div>
 						</div>
 						<div className="mr-2 ">
-							<a
-								href="#"
-								className="dark:hover:text-primary hover:text-primary transition-colors duration-200 ease-in-out text-[1.075rem] font-medium dark:text-neutral-400/90 text-secondary-inverse">
-								Robert Jason
-							</a>
-							<span className="text-secondary-dark dark:text-stone-500 font-medium block text-[0.85rem]">
-								Store Manager
+							<span className="text-secondary-dark uppercase dark:text-white font-medium block text-[1rem]">
+								{currentUser ? currentUser.name : "Admin"}
 							</span>
 						</div>
 					</div>
@@ -31,7 +36,7 @@ function Admin() {
 						<nav className="-mx-3 space-y-6">
 							<div className="space-y-3">
 								<label className="px-3 text-xs text-gray-500 uppercase dark:text-gray-400">
-									Admin
+									{currentUser ? currentUser.role : "Admin"}
 								</label>
 
 								<div className="flex items-center px-3 py-2 text-gray-600 transition-colors duration-300 transform rounded-lg dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 hover:text-gray-700">

@@ -35,6 +35,13 @@ export default function SignUp() {
 			dispatch(registerUser(response))
 				.then((action) => {
 					if (action.payload) {
+						const userRole = action.payload.role;
+						if (userRole === "admin") {
+							navigate("/admin");
+						} else if (userRole === "customer") {
+							navigate("/");
+						}
+
 						setEmail("");
 						setPhoneNumber("");
 						setPassword("");

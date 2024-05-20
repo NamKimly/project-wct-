@@ -55,7 +55,7 @@ export default function DashBoard() {
 								Total Products
 							</p>
 							<h4 className="block antialiased tracking-normal font-sans text-2xl font-semibold leading-snug text-blue-gray-900">
-								{countProduct}
+								{countProduct ? countProduct : 0}
 							</h4>
 						</div>
 						<div className="border-t border-blue-gray-50 p-4">
@@ -110,7 +110,7 @@ export default function DashBoard() {
 								Clients
 							</p>
 							<h4 className="block antialiased tracking-normal font-sans text-2xl font-semibold leading-snug text-blue-gray-900">
-								{countUser}
+								{countUser ? countUser : 0}
 							</h4>
 						</div>
 						<div className="border-t border-blue-gray-50 p-4">
@@ -163,7 +163,7 @@ export default function DashBoard() {
 									Phone
 								</th>
 								<th className="w-1/4 py-4 px-6 text-left text-gray-600 font-bold uppercase">
-									Status
+									Role
 								</th>
 							</tr>
 						</thead>
@@ -182,7 +182,7 @@ export default function DashBoard() {
 										</td>
 										<td className="py-4 px-6 border-b border-gray-200">
 											<span className="bg-green-500 text-white py-1 px-2 rounded-full text-xs">
-												Active
+												{users.role}
 											</span>
 										</td>
 									</tr>

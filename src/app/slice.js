@@ -16,9 +16,12 @@ export const registerUser = createAsyncThunk(
 				`${import.meta.env.VITE_API_URL}/register`,
 				userData
 			);
-			const user = response.data;
+			const user = response.data.user;
+			const access_token = response.data.access_token;
 			localStorage.setItem("user", JSON.stringify(user));
-			return user;
+			localStorage.setItem("token", JSON.stringify(access_token));
+
+			return user, access_token;
 		} catch (err) {
 			return thunkAPI.rejectWithValue(err.response.data.errors);
 		}
@@ -36,10 +39,12 @@ export const loginUser = createAsyncThunk(
 			);
 			const access_token = response.data.access_token;
 			const expire_token = response.data.expires_in;
+			const user = response.data.user;
 
+			localStorage.setItem("user", JSON.stringify(user));
 			localStorage.setItem("token", JSON.stringify(access_token));
 			localStorage.setItem("expires_in", expire_token);
-			return access_token;
+			return access_token, user;
 		} catch (err) {
 			// Handle errors by returning a rejected promise with the error message
 			return thunkAPI.rejectWithValue(err.response.data.errors);

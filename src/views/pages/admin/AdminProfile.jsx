@@ -1,4 +1,14 @@
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getCurrentUser } from "./../../../app/slice";
+
 export default function AdminProfile() {
+	const dispatch = useDispatch();
+	const currentUser = useSelector((state) => state.user.currentUser);
+	// Access currentUser from the auth slice
+	useEffect(() => {
+		dispatch(getCurrentUser());
+	}, [dispatch]);
 	return (
 		<>
 			<div className=" mx-auto py-8">
@@ -9,7 +19,7 @@ export default function AdminProfile() {
 								<img
 									src="https://raw.githubusercontent.com/Loopple/loopple-public-assets/main/riva-dashboard-tailwind/img/avatars/avatar1.jpg"
 									className="w-32 h-32 bg-gray-300 rounded-full mb-4 shrink-0"></img>
-								<h1 className="text-xl font-bold">John Doe</h1>
+								<h1 className="text-xl font-bold">{currentUser.name}</h1>
 								<p className="text-gray-700">Store Manager</p>
 							</div>
 							<div className="flex justify-center items-center mt-4">
@@ -26,8 +36,6 @@ export default function AdminProfile() {
 									<li className="mb-2">JavaScript</li>
 									<li className="mb-2">React</li>
 									<li className="mb-2">Node.js</li>
-									<li className="mb-2">HTML/CSS</li>
-									<li className="mb-2">Tailwind Css</li>
 								</ul>
 							</div>
 						</div>
