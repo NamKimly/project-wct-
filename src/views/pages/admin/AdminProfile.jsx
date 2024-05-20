@@ -19,7 +19,7 @@ export default function AdminProfile() {
 								<img
 									src="https://raw.githubusercontent.com/Loopple/loopple-public-assets/main/riva-dashboard-tailwind/img/avatars/avatar1.jpg"
 									className="w-32 h-32 bg-gray-300 rounded-full mb-4 shrink-0"></img>
-								<h1 className="text-xl font-bold">{currentUser.name}</h1>
+								<h1 className="text-xl font-bold">{currentUser?.name}</h1>
 								<p className="text-gray-700">Store Manager</p>
 							</div>
 							<div className="flex justify-center items-center mt-4">

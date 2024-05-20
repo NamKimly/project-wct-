@@ -8,8 +8,28 @@ import { getCurrentUser } from "./../../app/slice";
 
 export default function AppLayout() {
 	const dispatch = useDispatch();
+	// const navigate = useNavigate();
 	const currentUser = useSelector((state) => state.user.currentUser);
-	// Access currentUser from the auth slice
+
+	/**
+	 **If the token is expired return to login page
+	 ** On Consideration
+	 * **/
+	// useEffect(() => {
+	// 	const user_token = localStorage.getItem("token");
+
+	// 	if (!user_token) {
+	// 		navigate("/login");
+	// 	} else {
+	// 		const tokenExpirationTimeout = setTimeout(() => {
+	// 			localStorage.removeItem("token");
+	// 		}, 3600000);
+
+	// 		localStorage.setItem("tokenExpirationTimeout", tokenExpirationTimeout);
+	// 	}
+	// }, [navigate]);
+
+	//* Access currentUser from the auth slice
 
 	console.log(currentUser);
 	useEffect(() => {

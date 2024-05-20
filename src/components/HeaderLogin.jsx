@@ -11,7 +11,6 @@ export default function HeaderLogin() {
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 	const [openCart, setOpenCart] = useState(false);
 	const [isOpen, setIsOpen] = useState(false);
-	const navigate = useNavigate();
 	const dispatch = useDispatch();
 	// Access currentUser from the auth slice via token
 	const currentUser = useSelector((state) => state.user.currentUser);
@@ -27,25 +26,6 @@ export default function HeaderLogin() {
 	const handleCart = () => {
 		setOpenCart(!openCart);
 	};
-	/**
-	 *
-	 * If the token is expired return to login page
-	 *
-	 * **/
-	useEffect(() => {
-		const user_token = localStorage.getItem("token");
-		console.log(user_token);
-
-		if (!user_token) {
-			navigate("/login");
-		} else {
-			const tokenExpirationTimeout = setTimeout(() => {
-				localStorage.removeItem("token");
-			}, 3600000);
-			// Store the timeout ID in localStorage for future reference
-			localStorage.setItem("tokenExpirationTimeout", tokenExpirationTimeout);
-		}
-	}, [navigate]);
 
 	return (
 		<header className="navbar bg-white  mb-8">
@@ -225,7 +205,6 @@ export default function HeaderLogin() {
 	);
 }
 
-// eslint-disable-next-line react/prop-types
 function DropdownIcons({ isOpen }) {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
@@ -237,7 +216,6 @@ function DropdownIcons({ isOpen }) {
 
 		navigate("/");
 		console.log("logout");
-		window.location.reload();
 	};
 
 	return (

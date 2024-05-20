@@ -1,8 +1,6 @@
-/* eslint-disable react/prop-types */
-import { product } from "../../data/mock-data";
 import { Link } from "react-router-dom";
-
-console.log(typeof product);
+import { useState, useEffect } from "react";
+import axios from "axios";
 const SideBar = () => {
 	return (
 		<>
@@ -292,28 +290,34 @@ const SideBar = () => {
 	);
 };
 
+/**
+ ** Listing All Product from API
+ */
 const ProductsList = ({ product }) => {
 	return (
 		<div className="container mx-auto flex gap-8 flex-wrap max-w-2xl px-2 lg:max-w-7xl">
 			{product.map((product, key) => (
 				<div
 					key={key}
-					className="relative lg:max-w-7xl   h-full flex flex-col  text-gray-700 bg-white shadow-lg bg-clip-border rounded-xl lg:w-64">
+					className="lg:max-w-5xl  h-1/2  flex flex-col  text-gray-700 bg-white shadow-lg bg-clip-border rounded-xl lg:w-64">
 					<div className="flex relative h-52 mx-4 mt-4 overflow-hidden text-white bg-clip-border rounded-md shadow-blue-gray-500/40">
 						<div className="w-full h-full flex justify-center items-center m-4 ">
 							<img
-								src={product.images[0].image1}
+								src={product.images}
 								alt="card-image"
-								className="max-w-48 object-cover object-center lg:h-3/4 transition-transform duration-300 transform hover:scale-105 cursor-pointer"
+								className="max-w-44 object-cover object-center lg:h-3/4 transition-transform duration-300 transform hover:scale-105 cursor-pointer"
 							/>
 						</div>
 					</div>
 
 					<div className="p-6">
 						<p className="block mb-2 font-sans lg:text-xl md:text-base antialiased font-semibold leading-snug tracking-normal text-blue-gray-900">
-							{product.product_name}
+							{product.name}
 						</p>
-						<p className="block font-sans text-base text-red-500 antialiased font-light leading-relaxed text-inherit">
+						<p className="block font-sans text-semibold  antialiased font-light leading-relaxed text-inherit text-blue-gray-900">
+							Type: {product.category.name}
+						</p>
+						<p className="block mt-4 font-sans text-base text-red-500 antialiased font-semibold leading-relaxed text-inherit">
 							${product.price}
 						</p>
 					</div>
@@ -325,7 +329,7 @@ const ProductsList = ({ product }) => {
 						</button>
 						<div className="flex justify-center items-center gap-4">
 							<i className="far fa-heart cursor-pointer md:text-sm"></i>
-							<Link to={"/productdetail"}>
+							<Link to={`/productdetail/${product.id}`}>
 								<i className="fas fa-eye text-black cursor-pointer md:text-sm"></i>
 							</Link>
 						</div>
@@ -337,12 +341,24 @@ const ProductsList = ({ product }) => {
 };
 
 export default function Shopping() {
+	const [getProduct, setGetProduct] = useState([]);
+
+	//* Fetching Products from API
+	useEffect(() => {
+		const productList = async () => {
+			const product = await axios.get(
+				`${import.meta.env.VITE_API_URL}/products`
+			);
+			setGetProduct(product.data.product);
+		};
+		productList();
+	}, []);
 	return (
 		<>
 			<div className="flex gap-20">
 				<SideBar />
 				<div className="flex justify-start items-start">
-					<ProductsList product={product} />
+					<ProductsList product={getProduct} />
 				</div>
 			</div>
 		</>

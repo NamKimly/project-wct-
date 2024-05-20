@@ -181,7 +181,7 @@ export default function DashBoard() {
 											{users.mobile_no}
 										</td>
 										<td className="py-4 px-6 border-b border-gray-200">
-											<span className="bg-green-500 text-white py-1 px-2 rounded-full text-xs">
+											<span className="bg-green-500 uppercase text-white py-1 px-2 rounded-full text-xs">
 												{users.role}
 											</span>
 										</td>

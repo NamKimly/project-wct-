@@ -1,9 +1,11 @@
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, Link, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getCurrentUser } from "./../../../app/slice";
+import { getCurrentUser, logout } from "./../../../app/slice";
 
 function Admin() {
+	const navigate = useNavigate();
+
 	//* Get Admin Information
 	const dispatch = useDispatch();
 	const currentUser = useSelector((state) => state.user.currentUser);
@@ -11,6 +13,14 @@ function Admin() {
 	useEffect(() => {
 		dispatch(getCurrentUser());
 	}, [dispatch]);
+
+	//* Sign out from admin
+	const handleLogOut = () => {
+		dispatch(logout());
+		localStorage.clear();
+		navigate("/");
+		console.log("logout");
+	};
 	return (
 		<>
 			<div className="flex">
@@ -184,7 +194,11 @@ function Admin() {
 										/>
 									</svg>
 
-									<span className="mx-2 text-sm font-medium">Logout</span>
+									<button
+										onClick={handleLogOut}
+										className="mx-2 text-sm font-medium cursor-pointer">
+										Logout
+									</button>
 								</div>
 							</div>
 						</nav>

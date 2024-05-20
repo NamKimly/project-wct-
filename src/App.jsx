@@ -22,21 +22,29 @@ export default function App() {
 	return (
 		<Router>
 			<Routes>
+				{/** Client View */}
 				<Route element={<AppLayout />}>
-					<Route path="/" element={<Home />} />
 					<Route path="*" element={<PageNotFound />} />
+					<Route path="/" element={<Home />} />
 					<Route path="/shop" element={<Shopping />} />
+					<Route path="/productdetail" element={<ProductDetail />}>
+						<Route path=":productID" element={<ProductDetail />} />
+					</Route>
+
 					<Route path="/contact" element={<Contact />} />
 					<Route path="/payment" element={<Payment />} />
-					<Route path="/productdetail" element={<ProductDetail />} />
 				</Route>
 
+				{/** Authentication */}
 				<Route path="/login" element={<SignIn />} />
 				<Route path="/auth/google" element={<GoogleLogin />} />
 				<Route path="/auth/facebook" element={<FacebookLogin />} />
 				<Route path="/signup" element={<SignUp />} />
 
 				<Route path="/cart" element={<Cart />} />
+
+				{/** Admin View */}
+
 				<Route path="/admin" element={<Admin />}>
 					<Route path="/admin/dashboard" element={<DashBoard />} />
 					<Route path="/admin/approve_order" element={<ApproveOrder />} />
