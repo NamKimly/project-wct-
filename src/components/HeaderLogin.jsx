@@ -125,7 +125,9 @@ export default function HeaderLogin() {
 							<h2 className="font-bold text-gray-800 text-sm">
 								{currentUser.name}
 							</h2>
-							<p className="text-sm text-gray-600">Client</p>
+							<p className="text-sm text-gray-600 uppercase">
+								{currentUser.role}
+							</p>
 						</div>
 					</div>
 				</Popover.Group>
@@ -211,9 +213,7 @@ function DropdownIcons({ isOpen }) {
 
 	const handleLogOut = () => {
 		dispatch(logout());
-		localStorage.removeItem("token");
-		localStorage.removeItem("expires_in");
-
+		localStorage.clear();
 		navigate("/");
 		console.log("logout");
 	};

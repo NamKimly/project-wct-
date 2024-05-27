@@ -1,6 +1,9 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 
+let token = localStorage.getItem("token") ?? "";
+token = token.replace(/"/g, "");
+
 export default function DashBoard() {
 	const [getUser, setGetUser] = useState([]);
 	const [countUser, setCountUser] = useState(null);
@@ -9,7 +12,12 @@ export default function DashBoard() {
 	//Count total users
 	useEffect(() => {
 		const handleGetUser = async () => {
-			const users = await axios.get(`${import.meta.env.VITE_API_URL}/users`);
+			const users = await axios.get(`${import.meta.env.VITE_API_URL}/users`, {
+				headers: {
+					Accept: `application/json`,
+					Authorization: `Bearer ${token}`,
+				},
+			});
 			const amountUser = users.data.users.length;
 			setGetUser(users.data.users);
 			setCountUser(amountUser);
@@ -28,7 +36,6 @@ export default function DashBoard() {
 		};
 		handleGetProduct();
 	}, []);
-	console.log(countProduct);
 
 	return (
 		<>
@@ -160,7 +167,7 @@ export default function DashBoard() {
 									Email
 								</th>
 								<th className="w-1/4 py-4 px-6 text-left text-gray-600 font-bold uppercase">
-									Phone
+									Phone / Socials
 								</th>
 								<th className="w-1/4 py-4 px-6 text-left text-gray-600 font-bold uppercase">
 									Role
@@ -177,8 +184,8 @@ export default function DashBoard() {
 										<td className="py-4 px-6 border-b border-gray-200 truncate">
 											{users.email}
 										</td>
-										<td className="py-4 px-6 border-b border-gray-200">
-											{users.mobile_no}
+										<td className="py-4 px-6 border-b text-left uppercase  border-gray-200">
+											{users.mobile_no ? users.mobile_no : users.provider}
 										</td>
 										<td className="py-4 px-6 border-b border-gray-200">
 											<span className="bg-green-500 uppercase text-white py-1 px-2 rounded-full text-xs">

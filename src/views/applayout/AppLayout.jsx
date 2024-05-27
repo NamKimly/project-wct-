@@ -30,11 +30,11 @@ export default function AppLayout() {
 	// }, [navigate]);
 
 	//* Access currentUser from the auth slice
-
-	console.log(currentUser);
 	useEffect(() => {
-		dispatch(getCurrentUser());
-	}, [dispatch]);
+		if (!currentUser) {
+			dispatch(getCurrentUser());
+		}
+	}, [dispatch, currentUser]);
 	return (
 		<>
 			<div className="flex flex-col h-screen">

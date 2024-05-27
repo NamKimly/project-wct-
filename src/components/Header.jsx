@@ -2,10 +2,15 @@ import { useState } from "react";
 import { Dialog, Popover } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
+import Cart from "./../components/Cart";
 
 export default function Navbar() {
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+	const [openCart, setOpenCart] = useState(false);
 
+	const handleCart = () => {
+		setOpenCart(!openCart);
+	};
 	return (
 		<header className="navbar bg-white  mb-8">
 			<nav
@@ -72,6 +77,18 @@ export default function Navbar() {
 							placeholder="Search..."
 							required
 						/>
+					</div>
+					<div className="flex justify-center items-center">
+						<a href="#" className="text-sm font-semibold leading-6 text-black">
+							<i
+								onClick={handleCart}
+								className="fa-solid fa-cart-shopping text-lg "></i>
+						</a>
+						{openCart && (
+							<>
+								<Cart />
+							</>
+						)}
 					</div>
 					<div className="flex justify-center items-center gap-12">
 						<Link

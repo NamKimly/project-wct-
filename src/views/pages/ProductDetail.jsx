@@ -1,16 +1,9 @@
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { getCurrentUser } from "./../../app/slice";
+import DisplayLoading from "../../components/DisplayLoading";
 
 export default function ProductDetail() {
-	const dispatch = useDispatch();
-	const currentUser = useSelector((state) => state.user.currentUser);
-	useEffect(() => {
-		dispatch(getCurrentUser());
-	}, [dispatch]);
-
 	const { productID } = useParams();
 	const [getProductId, setGetProductId] = useState(null);
 	const [loading, setLoading] = useState(true);
@@ -32,8 +25,11 @@ export default function ProductDetail() {
 
 		fetchProductById();
 	}, [productID]);
+	const finalPrice = (currentPrice, percentage) => {
+		return (currentPrice * (1 - percentage * 0.01)).toFixed(2);
+	};
 
-	if (loading) return <div>Loading...</div>;
+	if (loading) return <DisplayLoading />;
 	if (error) return <div>{error}</div>;
 
 	return (
@@ -79,15 +75,15 @@ export default function ProductDetail() {
 				</ol>
 			</nav>
 			<div className="flex justify-start items-start mb-24">
-				<div className="w-full mx-auto flex justify-center gap-24 items-centerflex-wrap mt-12">
+				<div className="w-full mx-auto flex justify-center gap-24 items-center flex-wrap mt-12">
 					<div className="h-full w-[22rem] flex justify-start items-start">
 						<img
 							alt="ecommerce"
-							className="object-cover h-full w-96"
+							className="object-cover h-full w-96  lg:w-full sm:w-1/2"
 							src={getProductId.images}
 						/>
 					</div>
-					<div className="lg:w-2/5  w-full lg:py-6 mt-4 lg:mt-0 mr-54">
+					<div className="lg:w-2/5  w-full flex justify-center items-center flex-col  lg:py-6 mt-4 lg:mt-0 mr-54">
 						<h2 className="text-sm title-font text-gray-500 tracking-widest">
 							{getProductId.brand.name}
 						</h2>
@@ -138,16 +134,22 @@ export default function ProductDetail() {
 						</div>
 						<p className="leading-relaxed">{getProductId.description}</p>
 
-						<div className="flex justify-center items-center mt-8">
+						<div className="flex justify-center  items-center gap-8  mt-8">
 							<span className="title-font font-bold text-2xl text-gray-900">
-								${getProductId.price}
+								$
+								{getProductId.discount
+									? finalPrice(
+											getProductId.price,
+											getProductId.discount.percentage
+									  )
+									: getProductId.price}
 							</span>
 							<Link
-								to={currentUser ? "/payment" : "/login"}
-								className="flex ml-auto text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded">
+								to={"/payment"}
+								className="flex justify-center w-1/2 text-white bg-red-500 border-0 py-2 px-4 focus:outline-none hover:bg-red-600 rounded">
 								Buy Now
 							</Link>
-							<button className="rounded-full w-10 h-10 bg-gray-200 p-0 border-0 inline-flex items-center justify-center text-gray-500 ml-4">
+							<button className="rounded-full w-12 h-8 bg-gray-200 p-0 border-0 inline-flex items-center justify-center text-gray-500 ml-4">
 								<svg
 									fill="currentColor"
 									strokeLinecap="round"

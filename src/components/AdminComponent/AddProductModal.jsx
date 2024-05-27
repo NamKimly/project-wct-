@@ -4,6 +4,10 @@ import { storage } from "./../../firebase/firebase";
 import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 import { v4 } from "uuid";
 
+//* Passing Token
+let token = localStorage.getItem("token") ?? "";
+token = token.replace(/"/g, "");
+
 /**
  *
  * @PostingModal
@@ -99,7 +103,13 @@ const AddProductModal = ({ updateProduct, closeModal }) => {
 					// Post product data to backend
 					const postingProduct = await axios.post(
 						`${import.meta.env.VITE_API_URL}/products`,
-						credentials
+						credentials,
+						{
+							headers: {
+								Accept: `application/json`,
+								Authorization: `Bearer ${token}`,
+							},
+						}
 					);
 					console.log("Product posted successfully:", postingProduct.data);
 					setProductName("");
@@ -120,6 +130,24 @@ const AddProductModal = ({ updateProduct, closeModal }) => {
 	return (
 		<>
 			<div className="absolute z-40 w-full flex items-center justify-center mt-4">
+				<div className="flex justify-center items-center ">
+					<button
+						type="button"
+						onClick={closeModal}
+						className="text-slate-100  hover:bg-slate-200 hover:text-slate-200 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center  mb-4">
+						<svg
+							aria-hidden="true"
+							className="w-5 h-5 text-black"
+							fill="currentColor"
+							viewBox="0 0 20 20"
+							xmlns="http://www.w3.org/2000/svg">
+							<path
+								fillRule="evenodd"
+								d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+								clipRule="evenodd"></path>
+						</svg>
+					</button>
+				</div>
 				<div className="bg-white w-1/2 p-6 h-1/2 rounded shadow-md ">
 					<div className="flex justify-center items-center ">
 						<button

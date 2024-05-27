@@ -4,6 +4,10 @@ import { storage } from "./../../firebase/firebase";
 import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 import { v4 } from "uuid";
 
+//* Passing Token
+let token = localStorage.getItem("token") ?? "";
+token = token.replace(/"/g, "");
+
 /**
  *
  * @EditModal
@@ -20,6 +24,8 @@ const EditProductModal = ({ updateProduct, closeModal, id }) => {
 	const [productPrice, setProductPrice] = useState(null);
 	const [productImages, setProductImages] = useState(null);
 	const [productDescription, setProductDescription] = useState("");
+	const [productLastest, setProductLastest] = useState(false);
+
 	const [file, setFile] = useState(null);
 	const metadata = { contentType: "image/*" };
 
@@ -59,9 +65,10 @@ const EditProductModal = ({ updateProduct, closeModal, id }) => {
 				);
 				const product = response.data.product;
 				setProductName(product.name);
-				setProductBrand(product.brand_id);
-				setProductCategory(product.category_id);
+				setProductBrand(product.brand.id);
+				setProductCategory(product.category.id);
 				setProductPrice(product.price);
+				setProductLastest(product.is_new_arrival === 1 ? true : false);
 				setFile(product.images);
 				setProductDescription(product.description);
 			} catch (error) {
@@ -82,12 +89,19 @@ const EditProductModal = ({ updateProduct, closeModal, id }) => {
 				price: productPrice,
 				images: downloadURL || file,
 				description: productDescription,
+				is_new_arrival: productLastest,
 			};
 
 			try {
 				await axios.put(
 					`${import.meta.env.VITE_API_URL}/products/${id}`,
-					updatedProduct
+					updatedProduct,
+					{
+						headers: {
+							Accept: `application/json`,
+							Authorization: `Bearer ${token}`,
+						},
+					}
 				);
 				setProductName("");
 				setProductBrand("");
@@ -150,6 +164,46 @@ const EditProductModal = ({ updateProduct, closeModal, id }) => {
 					</button>
 				</div>
 				<form method="post" onSubmit={handleEditingProducts}>
+					<div className="flex justify-start items-start flex-col mb-2">
+						<label className="font-bold text-gray-700 cursor-pointer select-none text-start">
+							Product Status
+						</label>
+						<div className="flex justify-center items-center gap-2">
+							<label
+								className="relative flex items-center p-2  rounded-full cursor-pointer"
+								htmlFor="check">
+								<input
+									checked={productLastest}
+									onChange={() =>
+										setProductLastest(productLastest ? false : true)
+									}
+									type="checkbox"
+									name="productLastest"
+									className="before:content[''] peer relative h-5 w-5 cursor-pointer appearance-none rounded-md border border-blue-gray-200 transition-all before:absolute before:top-2/4 before:left-2/4 before:block before:h-12 before:w-12 before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-blue-gray-500 before:opacity-0 before:transition-opacity checked:border-gray-900 checked:bg-gray-900 checked:before:bg-gray-900 hover:before:opacity-10"
+								/>
+
+								<span className="absolute text-white transition-opacity opacity-0 pointer-events-none top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 peer-checked:opacity-100">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										className="h-3.5 w-3.5"
+										viewBox="0 0 20 20"
+										fill="currentColor"
+										stroke="currentColor"
+										strokeWidth="1">
+										<path
+											fillRule="evenodd"
+											d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+											clipRule="evenodd"></path>
+									</svg>
+								</span>
+							</label>
+							<label
+								className="mt-px text-semibold text-gray-700 cursor-pointer select-none text-center"
+								htmlFor="check">
+								New Arrival
+							</label>
+						</div>
+					</div>
 					<div className="w-full flex justify-between items-center gap-4">
 						<div className="mb-4 w-1/2">
 							<label
@@ -220,16 +274,7 @@ const EditProductModal = ({ updateProduct, closeModal, id }) => {
 							/>
 						</div>
 					</div>
-					<div className="mb-4">
-						<label className="block text-gray-700 text-sm font-bold mb-2">
-							Discount Percentage
-						</label>
-						<input
-							type="number"
-							name="discount"
-							className="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500"
-						/>
-					</div>
+
 					<div className="mb-4 flex flex-col justify-center">
 						<label className="block text-gray-700 text-sm font-bold mb-2">
 							Image

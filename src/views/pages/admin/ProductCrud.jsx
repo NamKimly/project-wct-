@@ -6,6 +6,7 @@ import Pagination from "../../../components/Pagination";
 import AddProductModal from "./../../../components/AdminComponent/AddProductModal";
 import EditProductModal from "../../../components/AdminComponent/EditProductModal";
 import DeleteModal from "../../../components/AdminComponent/DeleteModal";
+import AddDiscountModal from "../../../components/AdminComponent/AddDiscountModal";
 
 export default function ProductCrud() {
 	//* Pagination  /
@@ -19,6 +20,7 @@ export default function ProductCrud() {
 		isOpen: false,
 		showModal: false,
 		showModalEdit: false,
+		showDiscount: false,
 	});
 
 	//* Storing Items
@@ -35,7 +37,6 @@ export default function ProductCrud() {
 
 	//* Pagination of product
 	const currentPost = itemsCategory.slice(firstPostIndex, lastPostIndex);
-	console.log(currentPost);
 
 	//* Filter product by name of products
 	const filteredProducts = currentPost.filter((product) =>
@@ -60,9 +61,9 @@ export default function ProductCrud() {
 			});
 
 			if (categoryID || brandID) {
-				setItemsCategory(response.data.category); // Adjust based on your actual API response structure
+				setItemsCategory(response.data.category);
 			} else {
-				setItemsCategory(response.data.product); // Adjust based on your actual API response structure
+				setItemsCategory(response.data.product);
 			}
 		} catch (error) {
 			console.error("Error fetching products:", error.message);
@@ -111,8 +112,7 @@ export default function ProductCrud() {
 	const toggleModal = (type, isOpen) => {
 		setModalState((prevState) => ({ ...prevState, [type]: isOpen }));
 	};
-	console.log(itemsCategory.length);
-	console.log(postPerPage);
+
 	return (
 		<>
 			{modalState.isOpen && (
@@ -131,6 +131,13 @@ export default function ProductCrud() {
 			{modalState.showModalEdit && (
 				<EditProductModal
 					closeModal={() => toggleModal("showModalEdit", false)}
+					id={getId}
+					updateProduct={() => fetchProductsByCategory(itemsCategoryID)}
+				/>
+			)}
+			{modalState.showDiscount && (
+				<AddDiscountModal
+					closeModal={() => toggleModal("showDiscount", false)}
 					id={getId}
 					updateProduct={() => fetchProductsByCategory(itemsCategoryID)}
 				/>
@@ -260,7 +267,11 @@ export default function ProductCrud() {
 										<td className="p-4 border-b border-blue-gray-50">
 											<div className="w-max">
 												<div className="relative grid items-center font-sans font-bold uppercase whitespace-nowrap select-none bg-green-500/20 text-green-900 py-1 px-2 text-xs rounded-md">
-													<span className="">none</span>
+													<span className="">
+														{products.discount
+															? `${products.discount.percentage}%`
+															: "none"}
+													</span>
 												</div>
 											</div>
 										</td>
@@ -279,14 +290,14 @@ export default function ProductCrud() {
 											</div>
 										</td>
 										<td className="mt-12 p-4 border-b border-blue-gray-50">
-											<div className="flex justify-center items-center">
+											<div className="flex justify-center items- gap-4">
 												<button
 													onClick={() => {
 														toggleModal("showModalEdit", true);
 														setGetId(products.id);
 													}}
 													type="button"
-													className="mr-3 text-sm bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+													className=" text-sm bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">
 													Edit
 												</button>
 												<button
@@ -295,8 +306,18 @@ export default function ProductCrud() {
 														setGetId(products.id);
 													}}
 													type="button"
-													className="text-sm bg-red-500 hover:bg-red-700 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+													className="text-sm bg-red-700 hover:bg-red-500 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">
 													Delete
+												</button>
+
+												<button
+													onClick={() => {
+														toggleModal("showDiscount", true);
+														setGetId(products.id);
+													}}
+													type="button"
+													className="text-sm bg-green-700 hover:bg-green-500 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+													<i className="fa-solid fa-tags"></i>
 												</button>
 											</div>
 										</td>

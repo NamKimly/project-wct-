@@ -1,5 +1,8 @@
 import axios from "axios";
 
+let token = localStorage.getItem("token") ?? "";
+token = token.replace(/"/g, "");
+
 /**
  *
  * @DeleteModal
@@ -9,7 +12,13 @@ const DeleteModal = ({ updateProduct, closeModal, id }) => {
 	const handleDeleteItems = async (id) => {
 		try {
 			const deleteProducts = await axios.delete(
-				`${import.meta.env.VITE_API_URL}/products/${id}`
+				`${import.meta.env.VITE_API_URL}/products/${id}`,
+				{
+					headers: {
+						Accept: `application/json`,
+						Authorization: `Bearer ${token}`,
+					},
+				}
 			);
 			console.log(deleteProducts.data);
 			closeModal();

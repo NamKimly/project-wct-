@@ -17,8 +17,35 @@ import ApproveOrder from "./views/pages/admin/ApproveOrder";
 import ProductCrud from "./views/pages/admin/ProductCrud";
 import AdminProfile from "./views/pages/admin/AdminProfile";
 import AddingCategory from "./views/pages/admin/AddingCategory";
+import Protected from "./utils/Protected";
+import {
+	ProtectedRouteAdmin,
+	ProtectedRouteUser,
+} from "./utils/ProtectedRoute";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getCurrentUser } from "./app/slice";
 
 export default function App() {
+	const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+	//* Get User
+	const dispatch = useDispatch();
+	const currentUserRole = useSelector((state) => state.user.currentUser);
+	useEffect(() => {
+		if (!currentUserRole) {
+			dispatch(getCurrentUser());
+		}
+	}, [dispatch, currentUserRole]);
+
+	useEffect(() => {
+		if (currentUserRole) {
+			setIsLoggedIn(true);
+		} else {
+			setIsLoggedIn(false);
+		}
+	}, [currentUserRole]);
+
 	return (
 		<Router>
 			<Routes>
@@ -30,9 +57,12 @@ export default function App() {
 					<Route path="/productdetail" element={<ProductDetail />}>
 						<Route path=":productID" element={<ProductDetail />} />
 					</Route>
-
 					<Route path="/contact" element={<Contact />} />
-					<Route path="/payment" element={<Payment />} />
+					<Route path="/protected" element={<Protected />} />
+
+					<Route element={<ProtectedRouteUser isLogIn={isLoggedIn} />}>
+						<Route path="/payment" element={<Payment />} />
+					</Route>
 				</Route>
 
 				{/** Authentication */}
@@ -43,14 +73,15 @@ export default function App() {
 
 				<Route path="/cart" element={<Cart />} />
 
-				{/** Admin View */}
-
-				<Route path="/admin" element={<Admin />}>
-					<Route path="/admin/dashboard" element={<DashBoard />} />
-					<Route path="/admin/approve_order" element={<ApproveOrder />} />
-					<Route path="/admin/product_crud" element={<ProductCrud />} />
-					<Route path="/admin/profile" element={<AdminProfile />} />
-					<Route path="/admin/add_category" element={<AddingCategory />} />
+				{/** Admin View  and route protected*/}
+				<Route element={<ProtectedRouteAdmin isLogIn={isLoggedIn} />}>
+					<Route path="/admin" element={<Admin />}>
+						<Route path="/admin/dashboard" element={<DashBoard />} />
+						<Route path="/admin/approve_order" element={<ApproveOrder />} />
+						<Route path="/admin/product_crud" element={<ProductCrud />} />
+						<Route path="/admin/profile" element={<AdminProfile />} />
+						<Route path="/admin/add_category" element={<AddingCategory />} />
+					</Route>
 				</Route>
 			</Routes>
 		</Router>

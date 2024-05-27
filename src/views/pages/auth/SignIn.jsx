@@ -86,7 +86,7 @@ export default function SignIn() {
 			if (action.payload) {
 				const userRole = action.payload.role;
 				if (userRole === "admin") {
-					console.log(`This is ${userRole}: `);
+					console.log(`This is ${userRole} `);
 					navigate("/admin/dashboard");
 				} else {
 					console.log(`This is ${userRole}: `);

@@ -1,14 +1,20 @@
-import Slider from "../../components/Slider";
-import oven from "./../../assets/oven.png";
-import iron from "./../../assets/iron.png";
-import laundry from "./../../assets/laundry.png";
-import microwave from "./../../assets/microwave.png";
-import refrigerator from "./../../assets/refrigerator.png";
+import SliderBanner from "../../components/SliderBanner";
 import transport from "./../../assets/transport.png";
 import service from "./../../assets/service.png";
 import protect from "./../../assets/protect.png";
-import { product } from "../../data/mock-data";
+import axios from "axios";
+import Slider from "react-slick";
+import { Link } from "react-router-dom";
+import { product } from "./../../data/mock-data";
+import { useEffect, useState } from "react";
 
+const settings = {
+	dots: true,
+	infinite: true,
+	speed: 500,
+	slidesToShow: 4,
+	slidesToScroll: 3,
+};
 const NewArrival = () => {
 	return (
 		<>
@@ -45,6 +51,7 @@ const NewArrival = () => {
 								src="https://s.tmimgcdn.com/scr/1200x750/375400/special-sale-on-electronic-devices-banner-design-template-2_375421-original.jpg"
 								alt="#"
 								className="max-w-full rounded-lg hover:scale-105 transition-transform duration-300 transform"
+								loading="lazy"
 							/>
 						</div>
 					</div>
@@ -87,91 +94,92 @@ const CategoryCarosouel = ({ product }) => {
 				</div>
 				<div className="inline-block h-[21rem] min-h-[1.5rem] w-px self-stretch bg-zinc-300 ml-4"></div>
 
-				<Slider slides={product} />
+				<SliderBanner slides={product} />
 			</div>
 		</>
 	);
 };
-const ProductCard = ({ productType }) => {
-	return (
-		<>
-			{product.map((items, key) => (
-				<div
-					key={key}
-					className="relative flex flex-col mt- text-gray-700 bg-white shadow-lg bg-clip-border rounded-xl w-64">
-					<div className="flex relative h-52 mx-4 mt-4 overflow-hidden text-white  bg-clip-border rounded-md ">
-						<div className="w-full h-full flex justify-center items-center m-4">
-							<img
-								src={items.images[0].image1}
-								alt="card-image"
-								className="max-w-full object-cover object-center h-3/4 hover:scale-105 transition-transform duration-300 transform"
-							/>
-						</div>
 
-						{productType === "discount" && (
-							<div className="absolute bg-red-500 w-20 h-8 rounded-md flex justify-center items-center m-3">
-								<p className="text-white text-sm">50% OFF</p>
-							</div>
-						)}
-						{productType === "newArrival" && (
-							<div className="absolute bg-emerald-500 w-24 h-8 rounded-md flex justify-center items-center m-3">
-								<p className="text-white text-sm">New Arrival</p>
-							</div>
-						)}
-						{productType === "popular" && (
-							<div className="absolute bg-emerald-500 w-24 h-8 rounded-md flex justify-center items-center m-3">
-								<p className="text-white text-sm">Popular</p>
-							</div>
-						)}
-					</div>
+const DiscountProductListing = () => {
+	const [getDiscountProduct, setDiscountProduct] = useState(null);
+	useEffect(() => {
+		const fetchProduct = async () => {
+			const getProduct = await axios.get(
+				`${import.meta.env.VITE_API_URL}/discount`
+			);
+			setDiscountProduct(getProduct.data.discounts);
+		};
+		fetchProduct();
+	}, []);
 
-					<div className="p-6">
-						<h5 className="block mb-2 font-sans text-xl antialiased font-semibold leading-snug tracking-normal text-blue-gray-900">
-							{items.product_name}
-						</h5>
-						<p className="block font-sans text-base text-red-500 antialiased font-light leading-relaxed text-inherit">
-							${items.price}
-						</p>
-					</div>
-					<div className="flex justify-between items-center p-6 pt-0">
-						<button
-							className="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
-							type="button">
-							Add To Cart
-						</button>
-						<div className="flex justify-center items-center gap-4">
-							<i className="fa-regular fa-heart"></i>
-							<i className="fa-solid fa-eye text-black "></i>
-						</div>
-					</div>
-				</div>
-			))}
-		</>
-	);
-};
-
-const ProductListing = ({ categoryTitle, categoryHeader, isDiscount }) => {
-	const productType = isDiscount ? "discount" : "popular";
+	console.log(getDiscountProduct);
+	const finalPrice = (currentPrice, percentage) => {
+		return (currentPrice * (1 - percentage * 0.01)).toFixed(2);
+	};
+	console.log(getDiscountProduct);
 
 	return (
 		<>
 			<div className="flex flex-col mt-16  px-28">
 				<div className="flex justify-start items-center gap-4">
 					<div className="bg-red-600 w-4 h-8 rounded-sm"></div>
-					<p className="font-semibold ">{categoryHeader}</p>
+					<p className="font-semibold ">Discount</p>
 				</div>
-				<p className="font-bold text-3xl mt-4">{categoryTitle} </p>
-				<div className="flex justify-center items-center gap-20 mt-8 flex-wrap ">
-					<ProductCard productType={productType} />
-				</div>
+				<p className="font-bold text-3xl mt-4">Discount Products</p>
+				<div className="flex justify-start items-center gap-20 mt-8 flex-wrap ">
+					{getDiscountProduct &&
+						getDiscountProduct.map((products, key) => (
+							<div
+								key={key}
+								className="border lg:max-w-3xl  h-1/6 flex flex-col  text-gray-700 bg-white shadow-lg bg-clip-border rounded-xl lg:w-60">
+								<div className="flex relative h-52 mx-4 mt-4 overflow-hidden text-white bg-clip-border rounded-md shadow-blue-gray-500/40">
+									<div className="w-full h-full flex justify-center items-center m-4 ">
+										<img
+											src={products.product.images}
+											alt="card-image"
+											className="max-w-44 object-cover object-center lg:h-3/4 transition-transform duration-300 transform hover:scale-105 cursor-pointer"
+										/>
+									</div>
+									<div className="absolute bg-red-500 w-24 h-8 rounded-md flex justify-center items-center gap-2 m-3">
+										<i className="fa-solid fa-tag text-xs"></i>
+										<p className="text-white text-sm font-semibold">
+											{parseInt(products.percentage)}% off
+										</p>
+									</div>
+								</div>
 
-				<div className="flex justify-center items-center">
-					<button
-						className=" flex justify-center items-center gap-2 mt-12 align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-md bg-red-600 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
-						type="button">
-						See more
-						<i className="fa-solid fa-arrow-right-to-bracket"></i>
-					</button>
+								<div className="p-6">
+									<p className="block mb-2 font-sans lg:text-xl md:text-base antialiased font-semibold leading-snug tracking-normal text-blue-gray-900">
+										{products.product.name}
+									</p>
+									<p className="block font-sans text-sm  antialiased font-light leading-relaxed text-inherit text-blue-gray-900">
+										Type: {products.product.category}
+									</p>
+									<div className="flex gap-4 justify-start items-center">
+										<del className="block mt-4 font-sans text-sm text-red-500 antialiased font-semibold leading-relaxed text-inherit">
+											${products.product.price}
+										</del>
+
+										<p className="block mt-4 font-sans text-sm text-red-500 antialiased font-semibold leading-relaxed text-inherit">
+											${finalPrice(products.product.price, products.percentage)}
+										</p>
+									</div>
+								</div>
+								<div className="flex justify-between items-center p-6 pt-0">
+									<button
+										className="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
+										type="button">
+										Add To Cart
+									</button>
+									<div className="flex justify-center items-center gap-4">
+										<i className="far fa-heart cursor-pointer md:text-sm"></i>
+										<Link to={`/productdetail/${products.product.id}`}>
+											<i className="fas fa-eye text-black cursor-pointer md:text-sm"></i>
+										</Link>
+									</div>
+								</div>
+							</div>
+						))}
 				</div>
 			</div>
 			<hr className="cotainer my-12 mx-28 h-0.5 border-t-0 bg-zinc-300" />
@@ -179,49 +187,80 @@ const ProductListing = ({ categoryTitle, categoryHeader, isDiscount }) => {
 	);
 };
 
-const FilterCategory = ({ categoryHeader, categoryTitle }) => {
+const AllProductListing = () => {
+	const [products, setProducts] = useState(null);
+	useEffect(() => {
+		const fetchProduct = async () => {
+			const getProduct = await axios.get(
+				`${import.meta.env.VITE_API_URL}/products`
+			);
+			setProducts(getProduct.data.product);
+		};
+		fetchProduct();
+	}, []);
+
 	return (
 		<>
-			<p className="text-center font-bold text-3xl mt-4">Filter Products</p>
-			<div className="flex justify-center items-center gap-20 mt-12 ">
-				<div className="border rounded-lg hover:scale-105 border-slate-950  w-24 h-24 p-8 flex justify-center items-center flex-col cursor-pointer">
-					<img src={oven} alt="#" className="size-8" />
-					<p className="text-sm"> Oven</p>
-				</div>
-				<div className="border rounded-lg hover:scale-105 border-slate-950 w-24 h-24 p-8 flex justify-center items-center flex-col cursor-pointer">
-					<img src={iron} alt="#" className="size-8" />
-					<p className="text-sm"> Iron </p>
-				</div>
-				<div className="border rounded-lg hover:scale-105 border-slate-950 w-24 h-24 p-8 flex justify-center items-center flex-col cursor-pointer">
-					<img src={laundry} alt="#" className="size-8" />
-					<p className="text-sm">laundry</p>
-				</div>
-				<div className="border rounded-lg hover:scale-105 border-slate-950 w-24 h-24 p-8 flex justify-center items-center flex-col cursor-pointer">
-					<img src={microwave} alt="#" className="size-8" />
-					<p className="text-sm"> Microwave </p>
-				</div>
-				<div className="border rounded-lg hover:scale-105 border-slate-950 w-24 h-24 p-8 flex justify-center items-center flex-col cursor-pointer">
-					<img src={refrigerator} alt="#" className="size-8" />
-					<p className="text-sm"> Refrigerator</p>
-				</div>
-			</div>
-			<div className="container flex flex-col mt-16  px-28">
+			<div className="flex flex-col mt-16  px-28">
 				<div className="flex justify-start items-center gap-4">
 					<div className="bg-red-600 w-4 h-8 rounded-sm"></div>
-					<p className="font-semibold ">{categoryHeader}</p>
+					<p className="font-semibold ">Products</p>
 				</div>
-				<p className="font-bold text-3xl mt-4">{categoryTitle} </p>
-				<div className="flex justify-center items-center gap-20 listing-product mt-8 flex-wrap ">
-					<ProductCard />
-				</div>
+				<p className="font-bold text-3xl mt-4">Explore All Products</p>
+				<Slider className="w-full" {...settings}>
+					{products &&
+						products.map((product, key) => (
+							<div
+								key={key}
+								className="flex z-10 justify-center items-center gap-32 mt-8 mb-8">
+								<div className="lg:max-w-3xl border h-1/6 flex flex-col  text-gray-700 bg-white shadow-lg bg-clip-border rounded-xl lg:w-60">
+									<div className="flex relative h-52 mx-4 mt-4 overflow-hidden text-white bg-clip-border rounded-md shadow-blue-gray-500/40">
+										<div className="w-full h-full flex justify-center items-center m-4 ">
+											<img
+												src={product.images}
+												alt="card-image"
+												className="max-w-44 object-cover object-center lg:h-3/4 transition-transform duration-300 transform hover:scale-105 cursor-pointer"
+											/>
+										</div>
+									</div>
+
+									<div className="p-6">
+										<p className="block mb-2 font-sans lg:text-xl md:text-base antialiased font-semibold leading-snug tracking-normal text-blue-gray-900">
+											{product.name}
+										</p>
+										<p className="block font-sans text-sm  antialiased font-light leading-relaxed text-inherit text-blue-gray-900">
+											Type: {product.category.name}
+										</p>
+										<p className="block mt-4 font-sans text-sm text-red-500 antialiased font-semibold leading-relaxed text-inherit">
+											${product.price}
+										</p>
+									</div>
+									<div className="flex justify-between items-center p-6 pt-0">
+										<button
+											className="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
+											type="button">
+											Add To Cart
+										</button>
+										<div className="flex justify-center items-center gap-4">
+											<i className="far fa-heart cursor-pointer md:text-sm"></i>
+											<Link to={`/productdetail/${product.id}`}>
+												<i className="fas fa-eye text-black cursor-pointer md:text-sm"></i>
+											</Link>
+										</div>
+									</div>
+								</div>
+							</div>
+						))}
+				</Slider>
 
 				<div className="flex justify-center items-center">
-					<button
-						className=" flex justify-center items-center gap-2 mt-12 align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-md bg-red-600 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
+					<Link
+						to={"/shop"}
+						className="flex justify-center items-center gap-2 mt-12 align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-md bg-red-600 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
 						type="button">
 						See more
 						<i className="fa-solid fa-arrow-right-to-bracket"></i>
-					</button>
+					</Link>
 				</div>
 			</div>
 			<hr className="cotainer my-12 mx-28 h-0.5 border-t-0 bg-zinc-300" />
@@ -229,6 +268,118 @@ const FilterCategory = ({ categoryHeader, categoryTitle }) => {
 	);
 };
 
+const LastestProductListing = () => {
+	const [products, setProducts] = useState(null);
+	const [newArrival, setNewArrival] = useState(true);
+
+	useEffect(() => {
+		const fetchProduct = async () => {
+			try {
+				const getProduct = await axios.get(
+					`${import.meta.env.VITE_API_URL}/products`
+				);
+				const allProducts = getProduct.data.product;
+
+				// Filter products based on is_new_arrival
+				const newArrivals = allProducts.filter(
+					(product) => product.is_new_arrival === 1
+				);
+				const otherProducts = allProducts.filter(
+					(product) => product.is_new_arrival === 0
+				);
+
+				setProducts(newArrival ? newArrivals : otherProducts);
+			} catch (error) {
+				console.error("Error fetching products:", error);
+			}
+		};
+
+		fetchProduct();
+	}, [newArrival]);
+
+	console.log(products);
+	const finalPrice = (currentPrice, percentage) => {
+		return (currentPrice * (1 - percentage * 0.01)).toFixed(2);
+	};
+	return (
+		<>
+			<div className="flex flex-col mt-16  px-28">
+				<div className="flex justify-start items-center gap-4">
+					<div className="bg-red-600 w-4 h-8 rounded-sm"></div>
+					<p className="font-semibold ">Products</p>
+				</div>
+				<p className="font-bold text-3xl mt-4">New Arrival </p>
+				<div className="flex justify-cente items-center gap-20">
+					{products &&
+						products.map((product, key) => (
+							<div
+								key={key}
+								className="flex justify-start items-center gap-32 mt-8 mb-8">
+								<div className="lg:max-w-3xl border h-1/6 flex flex-col  text-gray-700 bg-white shadow-lg bg-clip-border rounded-xl lg:w-60">
+									<div className="flex relative h-52 mx-4 overflow-hidden text-white bg-clip-border rounded-md shadow-blue-gray-500/40">
+										<div className="w-full h-full flex justify-center items-center m-4 ">
+											<img
+												src={product.images}
+												alt="card-image"
+												className="max-w-44 object-cover object-center lg:h-3/4 transition-transform duration-300 transform hover:scale-105 cursor-pointer"
+											/>
+										</div>
+									</div>
+									<div className="absolute bg-green-500 w-24 h-8 rounded-md flex justify-center items-center gap-2 m-3">
+										<p className="text-white text-sm font-bold">
+											{product.is_new_arrival && "New Arrival"}
+										</p>
+									</div>
+
+									<div className="p-6">
+										<p className="block font-sans lg:text-xl md:text-base antialiased font-semibold leading-snug tracking-normal text-blue-gray-900">
+											{product.name}
+										</p>
+										<p className="block font-sans text-sm mt-2	  antialiased font-light leading-relaxed text-inherit text-blue-gray-900">
+											Type: {product.category.name}
+										</p>
+										<div className="flex gap-4 justify-start items-center">
+											{product.discount ? (
+												<div className="flex justify-center gap-2 mt-2 items-start ">
+													<del className="blockfont-sans text-sm text-red-500 antialiased font-semibold leading-relaxed text-inherit">
+														${product.price}
+													</del>
+													<p className="block font-sans text-sm text-red-500 antialiased font-semibold leading-relaxed text-inherit">
+														{finalPrice(
+															product.price,
+															product.discount.percentage
+														)}
+													</p>
+												</div>
+											) : (
+												<p className="block mt-2  font-sans text-sm text-red-500 antialiased font-semibold leading-relaxed text-inherit">
+													${product.price}
+												</p>
+											)}
+										</div>
+									</div>
+									<div className="flex justify-between items-center p-6 pt-0">
+										<button
+											className="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
+											type="button">
+											Add To Cart
+										</button>
+										<div className="flex justify-center items-center gap-4">
+											<i className="far fa-heart cursor-pointer md:text-sm"></i>
+											<Link to={`/productdetail/${product.id}`}>
+												<i className="fas fa-eye text-black cursor-pointer md:text-sm"></i>
+											</Link>
+										</div>
+									</div>
+								</div>
+							</div>
+						))}
+				</div>
+			</div>
+			<hr className="cotainer my-12 mx-28 h-0.5 border-t-0 bg-zinc-300" />
+		</>
+	);
+};
 const ShopInformation = () => {
 	return (
 		<>
@@ -259,25 +410,13 @@ export default function Home() {
 			<CategoryCarosouel product={product} />
 			<div className="lex flex-col justify-center items-center">
 				{/** Filter Popular  */}
-				<ProductListing
-					categoryHeader="Today"
-					categoryTitle="Popular Products"
-					isDiscount={false}
-				/>
+				<DiscountProductListing />
 				<NewArrival />
 
 				{/** Filter Discount  */}
-				<ProductListing
-					categoryHeader="Discount"
-					categoryTitle="Discount Products"
-					isDiscount={true}
-				/>
+				<LastestProductListing />
 				{/** List Products including discounts   */}
-				<FilterCategory
-					categoryHeader="Products"
-					categoryTitle="Explore All Products"
-				/>
-
+				<AllProductListing />
 				<ShopInformation />
 			</div>
 		</>

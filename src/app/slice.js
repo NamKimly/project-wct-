@@ -69,7 +69,6 @@ export const getCurrentUser = createAsyncThunk(
 				}
 			);
 
-			console.log(response.data.user);
 			return response.data.user;
 		} catch (err) {
 			// Handle errors by returning a rejected promise with the error message
