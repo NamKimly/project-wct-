@@ -1,18 +1,25 @@
-import { useState, useEffect } from "react";
+import Cart from "./../components/Cart";
+import axios from "axios";
+import { useState, useEffect, useCallback } from "react";
 import { Dialog, Popover } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import Cart from "./../components/Cart";
 import { logout } from "./../app/slice";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getCurrentUser } from "./../app/slice";
 
 export default function HeaderLogin() {
+	//* Get JWT token
+	let token = localStorage.getItem("token") ?? "";
+	token = token.replace(/"/g, "");
+
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 	const [openCart, setOpenCart] = useState(false);
 	const [isOpen, setIsOpen] = useState(false);
+	const [cartQuantity, setCartQuantity] = useState(null);
 	const dispatch = useDispatch();
-	// Access currentUser from the auth slice via token
+
+	//* Access currentUser from the auth slice via token
 	const currentUser = useSelector((state) => state.user.currentUser);
 
 	useEffect(() => {
@@ -27,6 +34,32 @@ export default function HeaderLogin() {
 		setOpenCart(!openCart);
 	};
 
+	//* Get the Cart quantity
+
+	const fetchCart = useCallback(async () => {
+		try {
+			const response = await axios.get(`${import.meta.env.VITE_API_URL}/cart`, {
+				headers: {
+					Accept: "application/json",
+					Authorization: `Bearer ${token}`,
+				},
+			});
+			setCartQuantity(response.data.cart.items.length);
+		} catch (err) {
+			console.log(err.message);
+		}
+	}, [token]);
+
+	useEffect(() => {
+		fetchCart();
+	}, [fetchCart]);
+
+	const handleCartUpdate = useCallback(() => {
+		fetchCart();
+	}, [fetchCart]);
+
+	console.log(cartQuantity);
+
 	return (
 		<header className="navbar bg-white  mb-8">
 			<nav
@@ -34,7 +67,7 @@ export default function HeaderLogin() {
 				aria-label="Global">
 				<div className="flex lg:flex-1">
 					<a href="#" className="-m-1.5 p-1.5">
-						<div className="flex justify-center items-center h-1 ">
+						<div className="flex justify-center items-center h-1">
 							<span className="text-red-600 font-extrabold text-3xl uppercase tracking-wider">
 								Electronic
 							</span>
@@ -95,15 +128,22 @@ export default function HeaderLogin() {
 						/>
 					</div>
 					<div className="flex justify-center items-center">
-						<a href="#" className="text-sm font-semibold leading-6 text-black">
+						<a
+							href="#"
+							className="flex justify-center items-center text-sm font-semibold leading-6 text-black">
+							<div className="text-center bg-red-500 w-4 text-white text-xs rounded-full">
+								{cartQuantity > 0 && cartQuantity}
+							</div>
 							<i
 								onClick={handleCart}
-								className="fa-solid fa-cart-shopping text-lg "></i>
+								className={` ${
+									currentUser?.role === "admin"
+										? "fa-solid fa-cart-shopping text-lg cursor-not-allowed"
+										: "fa-solid fa-cart-shopping text-lg"
+								}`}></i>
 						</a>
-						{openCart && (
-							<>
-								<Cart />
-							</>
+						{openCart && currentUser?.role !== "admin" && (
+							<Cart onCartUpdate={handleCartUpdate} />
 						)}
 					</div>
 					<div className="flex justify-center items-center">
@@ -227,16 +267,22 @@ function DropdownIcons({ isOpen }) {
 						isOpen ? "" : "hidden"
 					}`}>
 					{/* Dropdown content goes here */}
-					<a
-						href="#"
+					<Link
+						to="/user_profile"
 						className="block w-full text-sm mt-2 px-5 py-2 text-gray-700 hover:bg-gray-100 active:bg-blue-100 cursor-pointer rounded-md">
 						My Profile
-					</a>
-					<a
-						href="#"
+					</Link>
+					<Link
+						to="/cart_detail"
 						className="block w-full text-sm px-5 py-2 text-gray-700 hover:bg-gray-100 active:bg-blue-100 cursor-pointer rounded-md">
 						Shopping Cart
-					</a>
+					</Link>
+
+					<Link
+						to="/history_order"
+						className="block w-full text-sm px-5 py-2 text-gray-700 hover:bg-gray-100 active:bg-blue-100 cursor-pointer rounded-md">
+						History Order
+					</Link>
 
 					<div className="flex justify-center items-center p-2">
 						<button

@@ -18,8 +18,8 @@ export default function Pagination({
 						key={key}
 						className={
 							currentPage === page
-								? "active border h-full hover:bg-sky-500 hover:text-white  hover:border-white rounded-full flex justify-center items-center border-stone-800 w-[1.6rem]"
-								: " border rounded-full h-full hover:bg-sky-500 hover:text-white  hover:border-white flex justify-center items-center border-stone-800 w-[1.6rem]"
+								? "active border h-full hover:bg-sky-500 hover:text-white  hover:border-white rounded-md flex justify-center items-center border-stone-800 w-[1.6rem]"
+								: " border rounded-md  h-full hover:bg-sky-500 hover:text-white  hover:border-white flex justify-center items-center border-stone-800 w-[1.6rem]"
 						}>
 						{page}
 					</button>

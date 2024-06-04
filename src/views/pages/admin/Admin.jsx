@@ -1,18 +1,13 @@
 import { Outlet, Link, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { getCurrentUser, logout } from "./../../../app/slice";
-
+import { useDispatch } from "react-redux";
+import { logout } from "./../../../app/slice";
+import getCurrentUser from "./../../../utils/getCurrentUser";
 function Admin() {
 	const navigate = useNavigate();
 
 	//* Get Admin Information
 	const dispatch = useDispatch();
-	const currentUser = useSelector((state) => state.user.currentUser);
-	// Access currentUser from the auth slice
-	useEffect(() => {
-		dispatch(getCurrentUser());
-	}, [dispatch]);
+	const currentUser = getCurrentUser();
 
 	//* Sign out from admin
 	const handleLogOut = () => {

@@ -17,7 +17,12 @@ import ApproveOrder from "./views/pages/admin/ApproveOrder";
 import ProductCrud from "./views/pages/admin/ProductCrud";
 import AdminProfile from "./views/pages/admin/AdminProfile";
 import AddingCategory from "./views/pages/admin/AddingCategory";
+import CartDetail from "./components/CartDetail";
+import HistoryOrder from "./views/pages/admin/HistoryOrder";
 import Protected from "./utils/Protected";
+import UserProfile from "./views/pages/UserProfle";
+import ProductByBrand from "./views/pages/ProductByBrand";
+import ProductByCategory from "./views/pages/ProductByCategory";
 import {
 	ProtectedRouteAdmin,
 	ProtectedRouteUser,
@@ -53,15 +58,29 @@ export default function App() {
 				<Route element={<AppLayout />}>
 					<Route path="*" element={<PageNotFound />} />
 					<Route path="/" element={<Home />} />
+
 					<Route path="/shop" element={<Shopping />} />
+
+					<Route path="/product/brand_id" element={<ProductByBrand />}>
+						<Route path=":brandID" element={<ProductByBrand />} />
+					</Route>
+					<Route path="/product/category_id" element={<ProductByCategory />}>
+						<Route path=":categoryId" element={<ProductByCategory />} />
+					</Route>
+
 					<Route path="/productdetail" element={<ProductDetail />}>
 						<Route path=":productID" element={<ProductDetail />} />
 					</Route>
+
 					<Route path="/contact" element={<Contact />} />
 					<Route path="/protected" element={<Protected />} />
 
 					<Route element={<ProtectedRouteUser isLogIn={isLoggedIn} />}>
+						<Route path="/cart" element={<Cart />} />
+						<Route path="/cart_detail" element={<CartDetail />} />
 						<Route path="/payment" element={<Payment />} />
+						<Route path="/history_order" element={<HistoryOrder />} />
+						<Route path="/user_profile" element={<UserProfile />} />
 					</Route>
 				</Route>
 
@@ -70,8 +89,6 @@ export default function App() {
 				<Route path="/auth/google" element={<GoogleLogin />} />
 				<Route path="/auth/facebook" element={<FacebookLogin />} />
 				<Route path="/signup" element={<SignUp />} />
-
-				<Route path="/cart" element={<Cart />} />
 
 				{/** Admin View  and route protected*/}
 				<Route element={<ProtectedRouteAdmin isLogIn={isLoggedIn} />}>

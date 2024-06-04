@@ -71,7 +71,7 @@ export const getCurrentUser = createAsyncThunk(
 
 			return response.data.user;
 		} catch (err) {
-			// Handle errors by returning a rejected promise with the error message
+			//* Handle errors by returning a rejected promise with the error message
 			return thunkAPI.rejectWithValue(err.response.data.errors);
 		}
 	}

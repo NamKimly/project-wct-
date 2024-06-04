@@ -1,18 +1,18 @@
-import { useState, useEffect } from "react";
 import axios from "axios";
+import authToken from "./../../utils/authToken";
+import { useState, useEffect } from "react";
 import { storage } from "./../../firebase/firebase";
 import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 import { v4 } from "uuid";
-
-//* Passing Token
-let token = localStorage.getItem("token") ?? "";
-token = token.replace(/"/g, "");
 
 /**
  *
  * @PostingModal
  */
 const AddProductModal = ({ updateProduct, closeModal }) => {
+	//* Passing Token
+	const token = authToken();
+
 	const [getCategory, setGetCategory] = useState([]);
 	const [getBrand, setGetBrand] = useState([]);
 
@@ -33,38 +33,34 @@ const AddProductModal = ({ updateProduct, closeModal }) => {
 		contentType: "image/*",
 	};
 
-	// Fetching categories in database
-	useEffect(() => {
-		const fetchCategory = async () => {
-			try {
-				const category = await axios.get(
-					`${import.meta.env.VITE_API_URL}/category`
-				);
-				setGetCategory(category.data.category);
-			} catch (e) {
-				console.log(e.message);
-			}
-		};
-		fetchCategory();
-	}, []);
+	//* Loading state
+	const [isLoading, setIsLoading] = useState(false);
 
-	// Fetching brands in database
+	//*Fetching categories and brands  in database
 	useEffect(() => {
-		const fetchBrand = async () => {
+		const fetchCategoryAndBrand = async () => {
 			try {
-				const brand = await axios.get(`${import.meta.env.VITE_API_URL}/brand`);
-				setGetBrand(brand.data.brand);
+				const [categoryResponse, brandResponse] = await Promise.all([
+					axios.get(`${import.meta.env.VITE_API_URL}/category`),
+					axios.get(`${import.meta.env.VITE_API_URL}/brand`),
+				]);
+
+				setGetCategory(categoryResponse.data.category);
+				setGetBrand(brandResponse.data.brand);
 			} catch (e) {
 				console.log(e.message);
 			}
 		};
-		fetchBrand();
+		fetchCategoryAndBrand();
 	}, []);
 
 	const handlePostingProducts = async (e) => {
 		e.preventDefault();
 
 		if (!productImages) return;
+
+		// Start loading
+		setIsLoading(true);
 
 		// Upload image to Firebase Storage
 		const imageID = v4();
@@ -81,6 +77,7 @@ const AddProductModal = ({ updateProduct, closeModal }) => {
 			},
 			(error) => {
 				console.error("Error uploading image:", error);
+				setIsLoading(false); // Stop loading in case of error
 			},
 			async () => {
 				try {
@@ -95,7 +92,7 @@ const AddProductModal = ({ updateProduct, closeModal }) => {
 						name: productName,
 						category_id: productCategory,
 						brand_id: productBrand,
-						price: productPrice,
+						price: parseFloat(productPrice),
 						images: downloadURL,
 						description: productDescription,
 					};
@@ -122,11 +119,14 @@ const AddProductModal = ({ updateProduct, closeModal }) => {
 					updateProduct(); // Adding Product immediately
 				} catch (err) {
 					console.error("Error posting product:", err);
+				} finally {
+					setIsLoading(false); // Stop loading after completion
 				}
 			}
 		);
 		console.log(photoURL);
 	};
+
 	return (
 		<>
 			<div className="absolute z-40 w-full flex items-center justify-center mt-4">
@@ -242,7 +242,7 @@ const AddProductModal = ({ updateProduct, closeModal }) => {
 						</div>
 						<div className="mb-4">
 							<label className="block text-gray-700 text-sm font-bold mb-2">
-								Dicount Percentage
+								Discount Percentage
 							</label>
 							<input
 								type="number"
@@ -306,7 +306,7 @@ const AddProductModal = ({ updateProduct, closeModal }) => {
 							type="submit"
 							onClick={handlePostingProducts}
 							className="bg-blue-500  w-1/6 text-white py-2 px-2 rounded hover:bg-blue-700">
-							Save
+							{isLoading ? "Saving..." : "Save"}
 						</button>
 					</form>
 				</div>

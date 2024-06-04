@@ -1,14 +1,12 @@
 import axios from "axios";
-
-let token = localStorage.getItem("token") ?? "";
-token = token.replace(/"/g, "");
-
+import authToken from "./../../utils/authToken";
 /**
  *
  * @DeleteModal
  */
 
 const DeleteModal = ({ updateProduct, closeModal, id }) => {
+	const token = authToken();
 	const handleDeleteItems = async (id) => {
 		try {
 			const deleteProducts = await axios.delete(

@@ -1,12 +1,9 @@
-import { useState, useEffect } from "react";
 import axios from "axios";
+import authToken from "./../../utils/authToken";
+import { useState, useEffect, useCallback } from "react";
 import { storage } from "./../../firebase/firebase";
 import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 import { v4 } from "uuid";
-
-//* Passing Token
-let token = localStorage.getItem("token") ?? "";
-token = token.replace(/"/g, "");
 
 /**
  *
@@ -14,10 +11,12 @@ token = token.replace(/"/g, "");
  */
 
 const EditProductModal = ({ updateProduct, closeModal, id }) => {
+	//* Passing Token
+	const token = authToken();
+
 	const [getCategory, setGetCategory] = useState([]);
 	const [getBrand, setGetBrand] = useState([]);
 
-	/** */
 	const [productName, setProductName] = useState("");
 	const [productBrand, setProductBrand] = useState("");
 	const [productCategory, setProductCategory] = useState(null);
@@ -29,14 +28,16 @@ const EditProductModal = ({ updateProduct, closeModal, id }) => {
 	const [file, setFile] = useState(null);
 	const metadata = { contentType: "image/*" };
 
-	// Fetching categories in database
+	//* Fetching categories and brands  in database
 	useEffect(() => {
 		const fetchCategory = async () => {
 			try {
-				const category = await axios.get(
-					`${import.meta.env.VITE_API_URL}/category`
-				);
+				const [category, brand] = await Promise.all([
+					axios.get(`${import.meta.env.VITE_API_URL}/category`),
+					axios.get(`${import.meta.env.VITE_API_URL}/brand`),
+				]);
 				setGetCategory(category.data.category);
+				setGetBrand(brand.data.brand);
 			} catch (e) {
 				console.log(e.message);
 			}
@@ -44,39 +45,36 @@ const EditProductModal = ({ updateProduct, closeModal, id }) => {
 		fetchCategory();
 	}, []);
 
-	// Fetching brands in database
-	useEffect(() => {
-		const fetchBrand = async () => {
-			try {
-				const brand = await axios.get(`${import.meta.env.VITE_API_URL}/brand`);
-				setGetBrand(brand.data.brand);
-			} catch (e) {
-				console.log(e.message);
-			}
-		};
-		fetchBrand();
-	}, []);
+	const fetchProductByID = useCallback(async () => {
+		try {
+			const response = await axios.get(
+				`${import.meta.env.VITE_API_URL}/products/${id}`
+			);
+			const product = response.data.product;
+			setProductName(product.name);
+			setProductBrand(product.brand.id);
+			setProductCategory(product.category.id);
+			setProductPrice(product.price);
+			setProductLastest(product.is_new_arrival === 1 ? true : false);
+			setFile(product.images);
+			setProductDescription(product.description);
+		} catch (error) {
+			console.error("Error fetching product:", error.message);
+		}
+	}, [
+		id,
+		setProductName,
+		setProductBrand,
+		setProductCategory,
+		setProductPrice,
+		setProductLastest,
+		setFile,
+		setProductDescription,
+	]);
 
 	useEffect(() => {
-		const fetchProductByID = async () => {
-			try {
-				const response = await axios.get(
-					`${import.meta.env.VITE_API_URL}/products/${id}`
-				);
-				const product = response.data.product;
-				setProductName(product.name);
-				setProductBrand(product.brand.id);
-				setProductCategory(product.category.id);
-				setProductPrice(product.price);
-				setProductLastest(product.is_new_arrival === 1 ? true : false);
-				setFile(product.images);
-				setProductDescription(product.description);
-			} catch (error) {
-				console.error("Error fetching product:", error.message);
-			}
-		};
 		fetchProductByID();
-	}, [id]);
+	}, [fetchProductByID]);
 
 	const handleEditingProducts = async (e) => {
 		e.preventDefault();

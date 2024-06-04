@@ -1,50 +1,57 @@
 import axios from "axios";
+import authToken from "./../../../utils/authToken";
 import { useState, useEffect, useCallback } from "react";
 import { storage } from "./../../../firebase/firebase";
 import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 import { v4 } from "uuid";
 
-//* Passing Token
-let token = localStorage.getItem("token") ?? "";
-token = token.replace(/"/g, "");
-
 const EditCategoryModal = ({ closeModal, id, updateProduct }) => {
+	//* Passing Token
+	const token = authToken();
+
 	const [editCategory, setEditCategory] = useState("");
 
-	useEffect(() => {
-		const getCategory = async () => {
-			try {
-				const categoryList = await axios.get(
-					`${import.meta.env.VITE_API_URL}/category/${id}`
-				);
-				setEditCategory(categoryList.data.category.name);
-			} catch (e) {
-				console.log(e.message);
-			}
-		};
-		getCategory();
-	}, [id]);
-
-	const handleCategoryItem = async (e) => {
-		e.preventDefault();
+	//* Fetching Catagory API by ID
+	const getCategory = useCallback(async () => {
 		try {
-			const editProducts = await axios.put(
-				`${import.meta.env.VITE_API_URL}/category/${id}`,
-				{ name: editCategory },
-				{
-					headers: {
-						Accept: `application/json`,
-						Authorization: `Bearer ${token}`,
-					},
-				}
+			const categoryList = await axios.get(
+				`${import.meta.env.VITE_API_URL}/category/${id}`
 			);
-			closeModal(false);
-			updateProduct();
-			console.log(editProducts.data.category);
-		} catch (err) {
-			console.log(err.message);
+			setEditCategory(categoryList.data.category.name);
+		} catch (e) {
+			console.log(e.message);
 		}
-	};
+	}, [id]);
+	useEffect(() => {
+		getCategory();
+	}, [getCategory]);
+
+	//* After Fetching the category use method put to change the category
+	const handleCategoryItem = useCallback(
+		async (e) => {
+			e.preventDefault();
+			try {
+				const editProducts = await axios.put(
+					`${import.meta.env.VITE_API_URL}/category/${id}`,
+					{ name: editCategory }, //* Value that needs to input
+
+					//* Admin authorization
+					{
+						headers: {
+							Accept: `application/json`,
+							Authorization: `Bearer ${token}`,
+						},
+					}
+				);
+				closeModal(false);
+				updateProduct();
+				console.log(editProducts.data.category);
+			} catch (err) {
+				console.log(err.message);
+			}
+		},
+		[token, closeModal, id, updateProduct, editCategory]
+	);
 
 	return (
 		<>
@@ -104,8 +111,10 @@ const EditCategoryModal = ({ closeModal, id, updateProduct }) => {
 		</>
 	);
 };
-// eslint-disable-next-line react/prop-types
 const DeleteModalCategory = ({ updateProduct, closeModal, id }) => {
+	//* Passing Token
+	const token = authToken();
+
 	const handleDeleteCategory = async (id) => {
 		try {
 			const deleteCategory = await axios.delete(
@@ -176,9 +185,13 @@ const DeleteModalCategory = ({ updateProduct, closeModal, id }) => {
 };
 
 const EditBrandModal = ({ closeModal, id, updateProduct }) => {
+	//* Passing Token
+	const token = authToken();
+
 	const [brandData, setBrandData] = useState({ name: "", logoUrl: "" });
 	const [file, setFile] = useState(null);
 
+	//* Fetching Brand API by ID
 	useEffect(() => {
 		const getBrand = async () => {
 			try {
@@ -186,7 +199,7 @@ const EditBrandModal = ({ closeModal, id, updateProduct }) => {
 					`${import.meta.env.VITE_API_URL}/brand/${id}`
 				);
 				const { name, logo_url } = response.data.brand;
-				setBrandData({ name, logoUrl: logo_url });
+				setBrandData({ name, logoUrl: logo_url }); //* Set the value to use as a existing brand when editing
 			} catch (e) {
 				console.error("Failed to fetch brand:", e.message);
 			}
@@ -200,10 +213,12 @@ const EditBrandModal = ({ closeModal, id, updateProduct }) => {
 			const { name, logoUrl } = brandData;
 
 			const updateBrand = async (updatedLogoUrl = logoUrl) => {
+				//* Value that need to input
 				const updateBrandData = {
 					name,
 					logo_url: updatedLogoUrl,
 				};
+				//* Editing brand API
 				try {
 					await axios.put(
 						`${import.meta.env.VITE_API_URL}/brand/${id}`,
@@ -222,6 +237,7 @@ const EditBrandModal = ({ closeModal, id, updateProduct }) => {
 				}
 			};
 
+			//* Image management using firebase to convert from file to image URL which is stored on the firebase's server
 			if (!file) {
 				await updateBrand();
 			} else {
@@ -253,16 +269,17 @@ const EditBrandModal = ({ closeModal, id, updateProduct }) => {
 				);
 			}
 		},
-		[brandData, file, id, updateProduct, closeModal]
+		[brandData, file, id, updateProduct, closeModal, token]
 	);
 
+	//* If not changing file or name
 	const handleChange = useCallback((e) => {
 		const { name, value, files } = e.target;
 		if (name === "file") {
 			setFile(files[0]);
-			setBrandData((prev) => ({ ...prev, logoUrl: "" }));
+			setBrandData((prev) => ({ ...prev, logoUrl: "" })); //* Both name and image changes
 		} else {
-			setBrandData((prev) => ({ ...prev, [name]: value }));
+			setBrandData((prev) => ({ ...prev, [name]: value })); //* Only name that is changed
 		}
 	}, []);
 
@@ -351,6 +368,9 @@ const EditBrandModal = ({ closeModal, id, updateProduct }) => {
 };
 
 const DeleteModalBrand = ({ updateProduct, closeModal, id }) => {
+	//* Passing Token
+	const token = authToken();
+
 	const handleDeleteBrand = async (id) => {
 		try {
 			const deleteBrand = await axios.delete(
@@ -421,6 +441,9 @@ const DeleteModalBrand = ({ updateProduct, closeModal, id }) => {
 };
 
 export default function AddingCategory() {
+	//* Passing Token
+	const token = authToken();
+
 	const [category, setGetCategory] = useState([]);
 	const [brand, setGetBrand] = useState([]);
 	const [inputCategory, setInputCategory] = useState("");
@@ -504,13 +527,13 @@ export default function AddingCategory() {
 
 		if (!productImages) return;
 
-		// Generate a unique image ID and format
+		//* Generate a unique image ID and format
 		const imageID = v4();
 		const imageFormat = productImages.type.split("/")[1];
 		const imgRef = ref(storage, `brand_image/${imageID}.${imageFormat}`);
 		const uploadTask = uploadBytesResumable(imgRef, productImages, metadata);
 
-		// Handle the upload process
+		//* Handle the upload process
 		uploadTask.on(
 			"state_changed",
 			(snapshot) => {
@@ -540,13 +563,13 @@ export default function AddingCategory() {
 						}
 					);
 
-					// Append the new brand to the existing brands
+					//* Append the new brand to the existing brands
 					setGetBrand((prevBrand) => [
 						...prevBrand,
 						postBrandResult.data.brand,
 					]);
 
-					// Clear the input field and image after successful submission
+					//* Clear the input field and image after successful submission
 					setInputBrand("");
 					setProductImages(null);
 				} catch (e) {

@@ -1,14 +1,9 @@
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { getCurrentUser } from "./../../../app/slice";
+import getCurrentUser from "./../../../utils/getCurrentUser";
 
 export default function AdminProfile() {
-	const dispatch = useDispatch();
-	const currentUser = useSelector((state) => state.user.currentUser);
-	// Access currentUser from the auth slice
-	useEffect(() => {
-		dispatch(getCurrentUser());
-	}, [dispatch]);
+	//* Access currentUser from the auth slice
+	const currentUser = getCurrentUser();
+
 	return (
 		<>
 			<div className=" mx-auto py-8">

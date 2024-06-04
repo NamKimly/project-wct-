@@ -1,6 +1,4 @@
-/* eslint-disable react/prop-types */
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
 import Pagination from "../../../components/Pagination";
 import AddProductModal from "./../../../components/AdminComponent/AddProductModal";
@@ -11,7 +9,7 @@ import AddDiscountModal from "../../../components/AdminComponent/AddDiscountModa
 export default function ProductCrud() {
 	//* Pagination  /
 	const [currentPage, setCurrentPage] = useState(1);
-	const [postPerPage, setPostPerPage] = useState(10);
+	const [postPerPage, setPostPerPage] = useState(7);
 	const lastPostIndex = currentPage * postPerPage;
 	const firstPostIndex = lastPostIndex - postPerPage;
 
@@ -44,7 +42,7 @@ export default function ProductCrud() {
 	);
 
 	//* Fetching product by Category
-	const fetchProductsByCategory = async (categoryID, brandID) => {
+	const fetchProductsByCategory = useCallback(async (categoryID, brandID) => {
 		try {
 			let url = `${import.meta.env.VITE_API_URL}/products`;
 
@@ -68,40 +66,31 @@ export default function ProductCrud() {
 		} catch (error) {
 			console.error("Error fetching products:", error.message);
 		}
-	};
+	}, []);
 
 	useEffect(() => {
 		fetchProductsByCategory(itemsCategoryID, itemsBrandID);
-	}, [itemsCategoryID, itemsBrandID]);
+	}, [fetchProductsByCategory, itemsCategoryID, itemsBrandID]);
 	/**  */
 
-	// Fetching categories in database
-	useEffect(() => {
-		const fetchCategory = async () => {
-			try {
-				const category = await axios.get(
-					`${import.meta.env.VITE_API_URL}/category`
-				);
-				setGetCategory(category.data.category);
-			} catch (e) {
-				console.log(e.message);
-			}
-		};
-		fetchCategory();
+	//* Fetching categories and brands  in database
+	const fetchCategoryAndBrand = useCallback(async () => {
+		try {
+			const [categoryResponse, brandsResponse] = await Promise.all([
+				axios.get(`${import.meta.env.VITE_API_URL}/category`),
+				axios.get(`${import.meta.env.VITE_API_URL}/brand`),
+			]);
+
+			setGetCategory(categoryResponse.data.category);
+			setGetBrand(brandsResponse.data.brand);
+		} catch (e) {
+			console.log(e.message);
+		}
 	}, []);
 
-	// Fetching brands in database
 	useEffect(() => {
-		const fetchBrand = async () => {
-			try {
-				const brand = await axios.get(`${import.meta.env.VITE_API_URL}/brand`);
-				setGetBrand(brand.data.brand);
-			} catch (e) {
-				console.log(e.message);
-			}
-		};
-		fetchBrand();
-	}, []);
+		fetchCategoryAndBrand();
+	}, [fetchCategoryAndBrand]);
 
 	/**
 	 *
@@ -109,9 +98,96 @@ export default function ProductCrud() {
 	 *
 	 * */
 
-	const toggleModal = (type, isOpen) => {
+	const toggleModal = useCallback((type, isOpen) => {
 		setModalState((prevState) => ({ ...prevState, [type]: isOpen }));
-	};
+	}, []);
+
+	//* Setting useMemo for caching  prevents unnecessary render
+	const productRows = useMemo(() => {
+		if (!filteredProducts) return null;
+		return filteredProducts.map((product, key) => (
+			<tr key={key}>
+				<td className="p-4 border-b border-blue-gray-50">
+					<div className="flex items-center gap-3">
+						<img
+							src={product.images}
+							loading="lazy"
+							alt={product.name}
+							className="inline-block relative object-center w-12 h-12 rounded-lg border border-blue-gray-50 bg-blue-gray-50/50 object-contain p-1"
+						/>
+						<p className="block antialiased font-sans text-sm leading-normal text-blue-gray-900 font-bold">
+							{product.name}
+						</p>
+					</div>
+				</td>
+				<td className="p-4 border-b border-blue-gray-50">
+					<p className="block antialiased font-sans text-sm leading-normal text-blue-gray-900 font-normal">
+						{product.category.name}
+					</p>
+				</td>
+				<td className="p-4 border-b border-blue-gray-50">
+					<p className="block antialiased font-sans text-sm leading-normal text-blue-gray-900 font-normal">
+						{product.brand ? product.brand.name : "No brand"}
+					</p>
+				</td>
+				<td className="p-4 border-b border-blue-gray-50">
+					<div className="w-max">
+						<div className="relative grid items-center font-sans font-bold uppercase whitespace-nowrap select-none bg-green-500/20 text-green-900 py-1 px-2 text-xs rounded-md">
+							<span className="">
+								{product.discount ? `${product.discount.percentage}%` : "none"}
+							</span>
+						</div>
+					</div>
+				</td>
+				<td className="w-max p-4 border-b border-blue-gray-50">
+					<p className="block w-full antialiased font-sans text-sm leading-normal text-blue-gray-900 font-normal">
+						{product.description}
+					</p>
+				</td>
+				<td className="p-4 border-b border-blue-gray-50">
+					<div className="flex items-center gap-3">
+						<div className="flex flex-col">
+							<p className="block antialiased font-sans text-sm leading-normal text-blue-gray-900 font-normal capitalize">
+								${product.price}
+							</p>
+						</div>
+					</div>
+				</td>
+				<td className="mt-12 p-4 border-b border-blue-gray-50">
+					<div className="flex justify-center items- gap-4">
+						<button
+							onClick={() => {
+								toggleModal("showModalEdit", true);
+								setGetId(product.id);
+							}}
+							type="button"
+							className="text-sm bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+							Edit
+						</button>
+						<button
+							onClick={() => {
+								toggleModal("showModal", true);
+								setGetId(product.id);
+							}}
+							type="button"
+							className="text-sm bg-red-700 hover:bg-red-500 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+							Delete
+						</button>
+
+						<button
+							onClick={() => {
+								toggleModal("showDiscount", true);
+								setGetId(product.id);
+							}}
+							type="button"
+							className="text-sm bg-green-700 hover:bg-green-500 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+							<i className="fa-solid fa-tags"></i>
+						</button>
+					</div>
+				</td>
+			</tr>
+		));
+	}, [filteredProducts, toggleModal, setGetId]);
 
 	return (
 		<>
@@ -239,90 +315,7 @@ export default function ProductCrud() {
 						</thead>
 						<tbody>
 							{filteredProducts && filteredProducts.length > 0 ? (
-								filteredProducts.map((products, key) => (
-									<tr key={key}>
-										<td className="p-4 border-b border-blue-gray-50">
-											<div className="flex items-center gap-3">
-												<img
-													src={products.images}
-													loading="lazy"
-													alt={products.name}
-													className="inline-block relative object-center w-12 h-12 rounded-lg border border-blue-gray-50 bg-blue-gray-50/50 object-contain p-1"
-												/>
-												<p className="block antialiased font-sans text-sm leading-normal text-blue-gray-900 font-bold">
-													{products.name}
-												</p>
-											</div>
-										</td>
-										<td className="p-4 border-b border-blue-gray-50">
-											<p className="block antialiased font-sans text-sm leading-normal text-blue-gray-900 font-normal">
-												{products.category.name}
-											</p>
-										</td>
-										<td className="p-4 border-b border-blue-gray-50">
-											<p className="block antialiased font-sans text-sm leading-normal text-blue-gray-900 font-normal">
-												{products.brand ? products.brand.name : "No brand"}
-											</p>
-										</td>
-										<td className="p-4 border-b border-blue-gray-50">
-											<div className="w-max">
-												<div className="relative grid items-center font-sans font-bold uppercase whitespace-nowrap select-none bg-green-500/20 text-green-900 py-1 px-2 text-xs rounded-md">
-													<span className="">
-														{products.discount
-															? `${products.discount.percentage}%`
-															: "none"}
-													</span>
-												</div>
-											</div>
-										</td>
-										<td className="w-max p-4 border-b border-blue-gray-50">
-											<p className="block w-full antialiased font-sans text-sm leading-normal text-blue-gray-900 font-normal">
-												{products.description}
-											</p>
-										</td>
-										<td className="p-4 border-b border-blue-gray-50">
-											<div className="flex items-center gap-3">
-												<div className="flex flex-col">
-													<p className="block antialiased font-sans text-sm leading-normal text-blue-gray-900 font-normal capitalize">
-														${products.price}
-													</p>
-												</div>
-											</div>
-										</td>
-										<td className="mt-12 p-4 border-b border-blue-gray-50">
-											<div className="flex justify-center items- gap-4">
-												<button
-													onClick={() => {
-														toggleModal("showModalEdit", true);
-														setGetId(products.id);
-													}}
-													type="button"
-													className=" text-sm bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">
-													Edit
-												</button>
-												<button
-													onClick={() => {
-														toggleModal("showModal", true);
-														setGetId(products.id);
-													}}
-													type="button"
-													className="text-sm bg-red-700 hover:bg-red-500 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">
-													Delete
-												</button>
-
-												<button
-													onClick={() => {
-														toggleModal("showDiscount", true);
-														setGetId(products.id);
-													}}
-													type="button"
-													className="text-sm bg-green-700 hover:bg-green-500 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">
-													<i className="fa-solid fa-tags"></i>
-												</button>
-											</div>
-										</td>
-									</tr>
-								))
+								productRows
 							) : (
 								<tr>
 									<td

@@ -4,32 +4,30 @@ import { getCurrentUser } from "./../app/slice";
 import { useState, useEffect } from "react";
 import DisplayLoading from "../components/DisplayLoading";
 
-export function ProtectedRouteAdmin({ isLogIn }) {
-	const [getUser, setGetUser] = useState(null);
+function ProtectedRoute({ isLogIn, requiredRole, redirectPath }) {
+	const [userRole, setUserRole] = useState(null);
 	const [loading, setLoading] = useState(true);
 
 	const dispatch = useDispatch();
-	const currentUserRole = useSelector((state) => state.user.currentUser);
+	const currentUser = useSelector((state) => state.user.currentUser);
 
 	useEffect(() => {
 		const fetchUser = async () => {
-			if (!currentUserRole) {
+			if (!currentUser) {
 				await dispatch(getCurrentUser());
 			}
 			setLoading(false);
 		};
 		fetchUser();
-	}, [dispatch, currentUserRole]);
+	}, [dispatch, currentUser]);
 
 	useEffect(() => {
-		if (currentUserRole) {
-			setGetUser(currentUserRole.role);
+		if (currentUser) {
+			setUserRole(currentUser.role);
 		} else {
-			setGetUser(null);
+			setUserRole(null);
 		}
-	}, [currentUserRole]);
-
-	console.log(getUser);
+	}, [currentUser]);
 
 	if (loading) {
 		return <DisplayLoading />;
@@ -37,14 +35,31 @@ export function ProtectedRouteAdmin({ isLogIn }) {
 
 	return (
 		<>
-			{isLogIn && getUser === "admin" ? (
+			{isLogIn && userRole === requiredRole ? (
 				<Outlet />
 			) : (
-				<Navigate to="/protected" />
+				<Navigate to={redirectPath} />
 			)}
 		</>
 	);
 }
+
+export function ProtectedRouteAdmin({ isLogIn }) {
+	return (
+		<ProtectedRoute
+			isLogIn={isLogIn}
+			requiredRole="admin"
+			redirectPath="/protected"
+		/>
+	);
+}
+
 export function ProtectedRouteUser({ isLogIn }) {
-	return <>{isLogIn ? <Outlet /> : <Navigate to={"/login"} />}</>;
+	return (
+		<ProtectedRoute
+			isLogIn={isLogIn}
+			requiredRole="customer"
+			redirectPath="/login"
+		/>
+	);
 }

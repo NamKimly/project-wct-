@@ -1,16 +1,25 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, Popover } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import Cart from "./../components/Cart";
 
 export default function Navbar() {
+	//* Get value from localStorage
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 	const [openCart, setOpenCart] = useState(false);
+	const [cart, setCart] = useState(null);
 
 	const handleCart = () => {
 		setOpenCart(!openCart);
 	};
+
+	//* Need to make every render to show cart length on cart
+	useEffect(() => {
+		const items = JSON.parse(localStorage.getItem("cart_items")) || [];
+		setCart(items);
+	}, []);
+
 	return (
 		<header className="navbar bg-white  mb-8">
 			<nav
@@ -79,10 +88,17 @@ export default function Navbar() {
 						/>
 					</div>
 					<div className="flex justify-center items-center">
-						<a href="#" className="text-sm font-semibold leading-6 text-black">
+						<a
+							href="#"
+							className="flex justify-center items-center text-sm font-semibold leading-4 text-black">
+							{cart && cart.length > 0 && (
+								<div className="text-center bg-red-500 w-4 text-white text-xs rounded-full">
+									{cart.length}
+								</div>
+							)}
 							<i
 								onClick={handleCart}
-								className="fa-solid fa-cart-shopping text-lg "></i>
+								className="fa-solid fa-cart-shopping text-lg"></i>
 						</a>
 						{openCart && (
 							<>

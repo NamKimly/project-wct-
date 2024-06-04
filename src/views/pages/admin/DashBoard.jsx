@@ -1,16 +1,21 @@
 import axios from "axios";
+import authToken from "./../../../utils/authToken";
 import { useEffect, useState } from "react";
-
-let token = localStorage.getItem("token") ?? "";
-token = token.replace(/"/g, "");
 
 export default function DashBoard() {
 	const [getUser, setGetUser] = useState([]);
 	const [countUser, setCountUser] = useState(null);
 	const [countProduct, setCountProduct] = useState(null);
 
-	//Count total users
+	//*Count total users
 	useEffect(() => {
+		//* Getting Token from storing of each user by this only for admin
+		const token = authToken();
+
+		if (!token) {
+			console.error("No token found. User is not authorized.");
+			return;
+		}
 		const handleGetUser = async () => {
 			const users = await axios.get(`${import.meta.env.VITE_API_URL}/users`, {
 				headers: {
@@ -25,7 +30,7 @@ export default function DashBoard() {
 		handleGetUser();
 	}, []);
 
-	//Count total products
+	//* Count total products
 	useEffect(() => {
 		const handleGetProduct = async () => {
 			const products = await axios.get(

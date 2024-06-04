@@ -1,9 +1,10 @@
 import axios from "axios";
-import { useState, useEffect } from "react";
+import authToken from "./../../utils/authToken";
+import { useState, useEffect, useCallback } from "react";
 
-let token = localStorage.getItem("token") ?? "";
-token = token.replace(/"/g, "");
 export default function AddDiscountModal({ closeModal, id, updateProduct }) {
+	const token = authToken();
+
 	const [getPercentage, setPercentage] = useState(null);
 	const [inputPercentage, setInputPercentage] = useState(0); // Initialize inputPercentage to 0
 	const [getProductName, setProductName] = useState("");
@@ -34,48 +35,57 @@ export default function AddDiscountModal({ closeModal, id, updateProduct }) {
 		fetchingProduct();
 	}, [id]);
 
-	console.log(getPercentage);
-
 	//* Post and Edit on percentage of the product
-	const handleAddDiscount = async (e) => {
-		e.preventDefault();
+	const handleAddDiscount = useCallback(
+		async (e) => {
+			e.preventDefault();
 
-		try {
-			let url;
-			//* If the product has the discount percentage we could edit the percentage
-			if (getPercentage === null) {
-				url = `${import.meta.env.VITE_API_URL}/products/${id}/discounts`;
-			} else {
-				url = `${import.meta.env.VITE_API_URL}/discounts/${getIdDiscount}`;
+			try {
+				let url;
+				// If the product has the discount percentage we could edit the percentage
+				if (getPercentage === null) {
+					url = `${import.meta.env.VITE_API_URL}/products/${id}/discounts`;
+				} else {
+					url = `${import.meta.env.VITE_API_URL}/discounts/${getIdDiscount}`;
+				}
+
+				const response = await axios({
+					method: getPercentage === null ? "post" : "put",
+					url: url,
+					headers: {
+						Accept: `application/json`,
+						Authorization: `Bearer ${token}`,
+					},
+					data: {
+						name: getProductName,
+						percentage: parseFloat(inputPercentage), // Use inputPercentage instead of getPercentage
+					},
+				});
+
+				if (getPercentage === null) {
+					console.log("Discount added successfully:", response.data);
+				} else {
+					console.log("Discount updated successfully:", response.data);
+				}
+
+				closeModal();
+				updateProduct();
+			} catch (error) {
+				console.error("Error adding or updating discount:", error.message);
 			}
-
-			const response = await axios({
-				method: getPercentage === null ? "post" : "put",
-				url: url,
-				headers: {
-					Accept: `application/json`,
-					Authorization: `Bearer ${token}`,
-				},
-				data: {
-					name: getProductName,
-					percentage: inputPercentage, // Use inputPercentage instead of getPercentage
-				},
-			});
-
-			if (getPercentage === null) {
-				console.log("Discount added successfully:", response.data);
-			} else {
-				console.log("Discount updated successfully:", response.data);
-			}
-
-			closeModal();
-			updateProduct();
-		} catch (error) {
-			console.error("Error adding or updating discount:", error.message);
-		}
-	};
-
-	const handleDeleteDiscount = async () => {
+		},
+		[
+			getPercentage,
+			getIdDiscount,
+			token,
+			getProductName,
+			inputPercentage,
+			id,
+			closeModal,
+			updateProduct,
+		]
+	);
+	const handleDeleteDiscount = useCallback(async () => {
 		if (getIdDiscount) {
 			try {
 				const response = await axios.delete(
@@ -95,8 +105,7 @@ export default function AddDiscountModal({ closeModal, id, updateProduct }) {
 		} else {
 			console.log("There is no discount to delete");
 		}
-	};
-
+	}, [getIdDiscount, token, updateProduct]);
 	return (
 		<>
 			<div className="absolute z-40 w-full flex items-center justify-center mt-4">
@@ -130,7 +139,7 @@ export default function AddDiscountModal({ closeModal, id, updateProduct }) {
 							<input
 								type="text"
 								name="text"
-								value={getProductName || ""}
+								value={getProductName ?? ""}
 								onChange={(e) => setProductName(e.target.value)}
 								className="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500"
 							/>
