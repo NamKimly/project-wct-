@@ -1,24 +1,12 @@
 import axios from "axios";
-import authToken from "./../../utils/authToken";
-/**
- *
- * @DeleteModal
- */
 
-const DeleteModal = ({ updateProduct, closeModal, id }) => {
-	const token = authToken();
-	const handleDeleteItems = async (id) => {
+export default function DeletePromotion({ id, closeModal, updateProduct }) {
+	const handleDeletePromotion = async (id) => {
 		try {
 			const deleteProducts = await axios.delete(
-				`${import.meta.env.VITE_API_URL}/products/${id}`,
-				{
-					headers: {
-						Accept: `application/json`,
-						Authorization: `Bearer ${token}`,
-					},
-				}
+				`${import.meta.env.VITE_API_URL}/promotion/delete/${id}`
 			);
-			console.log(deleteProducts.data);
+			console.log(deleteProducts.data.message);
 			closeModal();
 			updateProduct();
 		} catch (err) {
@@ -27,7 +15,7 @@ const DeleteModal = ({ updateProduct, closeModal, id }) => {
 	};
 	return (
 		<>
-			<div className="fixed z-10 w-full flex items-center justify-center right-4 mt-12">
+			<div className="absolute z-20 w-full flex items-center justify-center mt-12">
 				<div className="bg-white w-1/2 p-6 h-1/2 rounded shadow-md">
 					<div className="flex justify-center items-center">
 						<h1>Confirmation</h1>
@@ -64,7 +52,7 @@ const DeleteModal = ({ updateProduct, closeModal, id }) => {
 							Close
 						</button>
 						<button
-							onClick={() => handleDeleteItems(id)}
+							onClick={() => handleDeletePromotion(id)}
 							type="button"
 							className="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-red-600 text-white  	 disabled:opacity-50 disabled:pointer-events-none">
 							Delete
@@ -74,5 +62,4 @@ const DeleteModal = ({ updateProduct, closeModal, id }) => {
 			</div>
 		</>
 	);
-};
-export default DeleteModal;
+}

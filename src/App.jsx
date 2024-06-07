@@ -23,6 +23,8 @@ import Protected from "./utils/Protected";
 import UserProfile from "./views/pages/UserProfle";
 import ProductByBrand from "./views/pages/ProductByBrand";
 import ProductByCategory from "./views/pages/ProductByCategory";
+import PromotionDetail from "./views/pages/PromtionDetail";
+import Promotion from "./views/pages/admin/Promotion";
 import {
 	ProtectedRouteAdmin,
 	ProtectedRouteUser,
@@ -72,6 +74,10 @@ export default function App() {
 						<Route path=":productID" element={<ProductDetail />} />
 					</Route>
 
+					<Route path="/promotion/detail" element={<PromotionDetail />}>
+						<Route path=":promotionID" element={<PromotionDetail />} />
+					</Route>
+
 					<Route path="/contact" element={<Contact />} />
 					<Route path="/protected" element={<Protected />} />
 
@@ -98,6 +104,7 @@ export default function App() {
 						<Route path="/admin/product_crud" element={<ProductCrud />} />
 						<Route path="/admin/profile" element={<AdminProfile />} />
 						<Route path="/admin/add_category" element={<AddingCategory />} />
+						<Route path="/admin/promotion" element={<Promotion />} />
 					</Route>
 				</Route>
 			</Routes>

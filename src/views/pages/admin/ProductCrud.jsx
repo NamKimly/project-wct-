@@ -59,9 +59,9 @@ export default function ProductCrud() {
 			});
 
 			if (categoryID || brandID) {
-				setItemsCategory(response.data.category);
+				setItemsCategory(response.data?.category);
 			} else {
-				setItemsCategory(response.data.product);
+				setItemsCategory(response.data?.product);
 			}
 		} catch (error) {
 			console.error("Error fetching products:", error.message);

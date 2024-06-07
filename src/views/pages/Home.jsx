@@ -1,10 +1,3 @@
-/* eslint-disable no-unused-vars */
-import SliderBanner from "../../components/SliderBanner";
-import transport from "./../../assets/transport.png";
-import service from "./../../assets/service.png";
-import protect from "./../../assets/protect.png";
-import axios from "axios";
-import Slider from "react-slick";
 import { Link } from "react-router-dom";
 import { product } from "./../../data/mock-data";
 import { useEffect, useState, useCallback, useMemo } from "react";
@@ -12,6 +5,13 @@ import { handleAddToCart } from "./../../utils/HandleCart";
 import { finalPrice } from "./../../utils/DiscountFunction";
 import getCurrentUser from "../../utils/getCurrentUser";
 import authToken from "./../../utils/authToken";
+import SliderBanner from "../../components/SliderBanner";
+import transport from "./../../assets/transport.png";
+import service from "./../../assets/service.png";
+import protect from "./../../assets/protect.png";
+import PromotionPage from "./PromotionPage";
+import axios from "axios";
+import Slider from "react-slick";
 
 const settings = {
 	dots: true,
@@ -89,7 +89,7 @@ const CategoryCarosouel = ({ product }) => {
 		<>
 			<div className="flex justify-center items-start mx-8 gap-4 flex-wrap">
 				<div className="category ml-8">
-					<p className="font-bold text-2xl mb-8">Home Appliances</p>
+					<p className="font-bold text-2xl mb-8">Kitchen Appliances</p>
 
 					<div className="flex justify-start items-start flex-col gap-3 ">
 						{category &&
@@ -485,6 +485,7 @@ export default function Home() {
 		<>
 			<CategoryCarosouel product={product} />
 			<div className="lex flex-col justify-center items-center">
+				<PromotionPage />
 				<ProductByBrand />
 				<DiscountProductListing />
 				<NewArrival />

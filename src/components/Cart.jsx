@@ -178,7 +178,7 @@ export default function Cart({ onCartUpdate }) {
 					}
 				);
 				setCartItems(getCart.data.cart.items);
-				onCartUpdate();
+				fetchCart();
 			} catch (err) {
 				console.error("Error removing item from cart:", err.message);
 			}
@@ -209,7 +209,6 @@ export default function Cart({ onCartUpdate }) {
 			setTotalPrice(newTotalPrice);
 		}
 	};
-	console.log(totalPrice);
 
 	return (
 		<Transition.Root show={open} as={Fragment}>
