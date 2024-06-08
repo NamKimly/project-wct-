@@ -56,13 +56,15 @@ export default function PromotionPage() {
 																className="h-full w-full object-cover object-center"
 															/>
 														</div>
-														<div className="h-64 w-full overflow-hidden rounded-lg">
-															<img
-																src={items.products[2].images}
-																alt=""
-																className="h-full w-full object-cover object-center"
-															/>
-														</div>
+														{items.products[2] && (
+															<div className="h-64 w-full overflow-hidden rounded-lg">
+																<img
+																	src={items?.products[2]?.images}
+																	alt=""
+																	className="h-full w-full object-cover object-center"
+																/>
+															</div>
+														)}
 													</div>
 													<hr className="cotainer my-12 mx-28 h-0.5 border-t-0 bg-zinc-300" />
 												</div>

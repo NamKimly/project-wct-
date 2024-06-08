@@ -1,10 +1,14 @@
 import axios from "axios";
 import DeletePromotion from "../../../components/AdminComponent/DeletePromotion";
+import AddPromotion from "../../../components/AdminComponent/AddPromotion";
+import EditPromotion from "./../../../components/AdminComponent/EditPromotion";
 import { useState, useEffect, useCallback } from "react";
 
 export default function Promotion() {
 	const [promotionDetail, setPromotionDetail] = useState([]);
 	const [openDelete, setOpenDelete] = useState(false);
+	const [openAdd, setOpenAdd] = useState(false);
+	const [openEdit, setOpenEdit] = useState(false);
 	const [getId, setGetId] = useState(null);
 	//* Fetching Data from Promotions
 	const fetchPromotions = useCallback(async () => {
@@ -77,8 +81,16 @@ export default function Promotion() {
 		));
 	};
 
+	console.log(promotionDetail);
 	return (
 		<>
+			{openAdd && (
+				<AddPromotion
+					updateProduct={() => fetchPromotions()}
+					closeModal={() => setOpenAdd(!openAdd)}
+				/>
+			)}
+
 			{openDelete && (
 				<DeletePromotion
 					updateProduct={() => fetchPromotions()}
@@ -86,9 +98,20 @@ export default function Promotion() {
 					id={getId}
 				/>
 			)}
+
+			{openEdit && (
+				<EditPromotion
+					updateProduct={() => fetchPromotions()}
+					closeModal={() => setOpenEdit(!openEdit)}
+					id={getId}
+				/>
+			)}
+
 			<div className="flex flex-col items-center justify-center bg-white">
 				<div className="flex justify-start mt-4 p-2 items-center w-full">
-					<button className="flex justify-center items-center gap-2 bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 w-1/8 h-full mr-4 rounded text-sm">
+					<button
+						onClick={() => setOpenAdd(!openAdd)}
+						className="flex justify-center items-center gap-2 bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 w-1/8 h-full mr-4 rounded text-sm">
 						<i className="fa-solid fa-plus"></i>
 						Add New Event
 					</button>
@@ -108,15 +131,26 @@ export default function Promotion() {
 											{promotion.name}
 										</p>
 									</div>
-									<button
-										onClick={() => {
-											setOpenDelete(!openDelete);
-											setGetId(promotionDetail.id);
-										}}
-										className="flex justify-center items-center gap-2 bg-red-500 hover:bg-red-700 text-white py-2 px-4 w-1/8 h-full mr-4 rounded text-sm">
-										<i className="fa-solid fa-xmark"></i>
-										Cancel Promotion
-									</button>
+									<div className="flex justify-center items-center gap-2">
+										<button
+											onClick={() => {
+												setOpenEdit(!openDelete);
+												setGetId(promotion.id);
+											}}
+											className="flex justify-center items-center gap-2 bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 w-1/8 h-full mr-4 rounded text-sm">
+											<i className="fa-regular fa-pen-to-square"></i>
+											Edit Promotion
+										</button>
+										<button
+											onClick={() => {
+												setOpenDelete(!openDelete);
+												setGetId(promotion.id);
+											}}
+											className="flex justify-center items-center gap-2 bg-red-500 hover:bg-red-700 text-white py-2 px-4 w-1/8 h-full mr-4 rounded text-sm">
+											<i className="fa-solid fa-xmark"></i>
+											Cancel Promotion
+										</button>
+									</div>
 								</div>
 
 								<table className="w-full max-w-screen table-auto text-left mt-4">

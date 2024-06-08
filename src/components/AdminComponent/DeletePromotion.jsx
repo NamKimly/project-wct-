@@ -1,10 +1,10 @@
 import axios from "axios";
 
 export default function DeletePromotion({ id, closeModal, updateProduct }) {
-	const handleDeletePromotion = async (id) => {
+	const handleDeletePromotion = async () => {
 		try {
 			const deleteProducts = await axios.delete(
-				`${import.meta.env.VITE_API_URL}/promotion/delete/${id}`
+				`${import.meta.env.VITE_API_URL}/promotions/delete/${id}`
 			);
 			console.log(deleteProducts.data.message);
 			closeModal();
@@ -39,7 +39,7 @@ export default function DeletePromotion({ id, closeModal, updateProduct }) {
 					<hr className="h-0.5 border-t-0 bg-neutral-100" />
 					<div className="p-2 overflow-y-auto">
 						<p className="mt-1 text-gray-800">
-							Do you want to delete this product?
+							Do you want to delete this promotion event ?
 						</p>
 					</div>
 					<hr className="mt-2 h-0.5 border-t-0 bg-neutral-100" />
