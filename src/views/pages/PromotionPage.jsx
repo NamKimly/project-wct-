@@ -44,7 +44,7 @@ export default function PromotionPage() {
 															<img
 																src={items.products[0].images}
 																alt=""
-																className="h-full w-full object-fill object-center"
+																className="h-full w-10/12 object-fill object-center"
 															/>
 														</div>
 													</div>
@@ -53,7 +53,7 @@ export default function PromotionPage() {
 															<img
 																src={items.products[1].images}
 																alt=""
-																className="h-full w-full object-cover object-center"
+																className="h-full w-10/12 object-fill object-center"
 															/>
 														</div>
 														{items.products[2] && (
@@ -61,7 +61,7 @@ export default function PromotionPage() {
 																<img
 																	src={items?.products[2]?.images}
 																	alt=""
-																	className="h-full w-full object-cover object-center"
+																	className="h-full w-10/12 object-fill object-center"
 																/>
 															</div>
 														)}

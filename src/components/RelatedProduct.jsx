@@ -190,7 +190,7 @@ export default function RelatedProduct({ categoryID, brandID, existingID }) {
 											<span className="line-through text-black text-sm">
 												${product.price}
 											</span>
-											<span className="text-black text-sm">to</span>$
+											<span className="text-black text-sm">to</span>
 											{finalPrice(product.price, product.discount.percentage)}
 										</div>
 									) : (

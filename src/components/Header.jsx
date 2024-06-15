@@ -45,7 +45,7 @@ export default function Navbar() {
 					</button>
 				</div>
 
-				<Popover.Group className="hidden lg:flex lg:gap-x-16  justify-center items-center">
+				<Popover.Group className="hidden lg:flex lg:gap-x-14  justify-center items-center">
 					<Link to={"/"} className="text-sm font-semibold leading-6 text-black">
 						Home
 					</Link>

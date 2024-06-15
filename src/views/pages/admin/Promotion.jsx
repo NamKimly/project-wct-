@@ -10,6 +10,7 @@ export default function Promotion() {
 	const [openAdd, setOpenAdd] = useState(false);
 	const [openEdit, setOpenEdit] = useState(false);
 	const [getId, setGetId] = useState(null);
+
 	//* Fetching Data from Promotions
 	const fetchPromotions = useCallback(async () => {
 		try {
@@ -25,8 +26,7 @@ export default function Promotion() {
 
 	useEffect(() => {
 		fetchPromotions();
-	}, [fetchPromotions]);
-
+	}, []);
 	const renderProductRows = (products) => {
 		return products.map((product, key) => (
 			<tr key={key}>
@@ -80,7 +80,6 @@ export default function Promotion() {
 			</tr>
 		));
 	};
-
 	console.log(promotionDetail);
 	return (
 		<>
@@ -194,7 +193,7 @@ export default function Promotion() {
 						))
 					) : (
 						<p className="block antialiased font-sans text-sm leading-normal text-blue-gray-900 font-bold">
-							There are no products in the list.
+							There are no promtion in the list.
 						</p>
 					)}
 				</div>

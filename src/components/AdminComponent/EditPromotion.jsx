@@ -1,21 +1,155 @@
 import axios from "axios";
 import { useState, useEffect, useCallback } from "react";
-export default function EditPromotion({ closeModal, id }) {
-	const [getPromotionById, setPromotionId] = useState([]);
+import Select from "react-select";
+import makeAnimated from "react-select/animated";
+
+const animatedComponents = makeAnimated();
+
+const customOption = (props) => {
+	const { innerRef, innerProps, data } = props;
+	return (
+		<div
+			ref={innerRef}
+			{...innerProps}
+			className="custom-option flex justify-between items-center">
+			<div className="flex justify-start items-center">
+				<img
+					src={data.image}
+					alt={data.label}
+					style={{ width: 50, height: 50, marginRight: 10 }}
+				/>
+				{data.label}
+			</div>
+			<label className="relative flex items-center gap-2 p-2 rounded-full cursor-pointer">
+				<p className="text-xs">Free</p>
+				<input
+					type="checkbox"
+					name="productLastest"
+					className="before:content[''] peer relative h-5 w-5 cursor-pointer appearance-none rounded-md border border-blue-gray-200 transition-all before:absolute before:top-2/4 before:left-2/4 before:block before:h-12 before:w-12 before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-blue-gray-500 before:opacity-0 before:transition-opacity checked:border-gray-900 checked:bg-gray-900 checked:before:bg-gray-900 hover:before:opacity-10"
+					checked={data.is_free}
+					onChange={() => props.handleCheckboxChange(data)}
+				/>
+				<span className="absolute text-white transition-opacity opacity-0 pointer-events-none top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 peer-checked:opacity-100">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						className="h-3.5 w-3.5"
+						viewBox="0 0 20 20"
+						fill="currentColor"
+						stroke="currentColor"
+						strokeWidth="1">
+						<path
+							fillRule="evenodd"
+							d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+							clipRule="evenodd"></path>
+					</svg>
+				</span>
+			</label>
+		</div>
+	);
+};
+
+export default function EditPromotion({ closeModal, id, updateProduct }) {
+	const [products, setProducts] = useState([]);
 	const [eventName, setEventName] = useState("");
 	const [eventDescription, setEventDescription] = useState("");
+	const [eventProduct, setEventProduct] = useState([]);
+
 	const getPromotionId = useCallback(async () => {
-		const response = await axios.get(
-			`${import.meta.env.VITE_API_URL}/promotions/${id}`
+		const [responsePromotion, responseProduct] = await Promise.all([
+			axios.get(`${import.meta.env.VITE_API_URL}/promotions/${id}`),
+			axios.get(`${import.meta.env.VITE_API_URL}/products`),
+		]);
+
+		const promotion_product = responsePromotion.data.promotion_products;
+		setEventName(promotion_product.name);
+		setEventDescription(promotion_product.description);
+		const formattedProducts =
+			responsePromotion.data.promotion_products.products.map((product) => ({
+				value: product.id,
+				label: product.name,
+				image: product.images,
+				is_free: product.pivot.is_free, // Ensuring the existing status is reflected
+			}));
+		const formattedListProducts = responseProduct.data.product.map(
+			(product) => ({
+				value: product.id,
+				label: product.name,
+				image: product.images,
+				is_free: false,
+			})
 		);
-		const product = response.data.promotion_products;
-		setEventName(product.name);
-		setEventDescription(product.description);
+		setEventProduct(formattedProducts);
+		setProducts(formattedListProducts);
 	}, [id]);
 
 	useEffect(() => {
 		getPromotionId();
 	}, [getPromotionId]);
+
+	// Handle selection change for products
+	const handleCheckboxChange = (selectedProduct) => {
+		setProducts((prevProducts) =>
+			prevProducts.map((product) =>
+				product.value === selectedProduct.value
+					? { ...product, is_free: !product.is_free }
+					: product
+			)
+		);
+		setEventProduct((prevProducts) =>
+			prevProducts.map((product) =>
+				product.value === selectedProduct.value
+					? { ...product, is_free: !product.is_free }
+					: product
+			)
+		);
+	};
+
+	// Handle product selection
+	const handleSelectChange = (selectedOptions) => {
+		const selectedValues = selectedOptions || [];
+
+		// Update products to reset `is_free` state if a product is deselected
+		setProducts((prevProducts) =>
+			prevProducts.map((product) =>
+				selectedValues.find((selected) => selected.value === product.value)
+					? product
+					: { ...product, is_free: false }
+			)
+		);
+
+		// Update eventProduct state
+		const updatedEventProduct = products.filter((product) =>
+			selectedValues.some((selected) => selected.value === product.value)
+		);
+
+		setEventProduct(updatedEventProduct);
+	};
+
+	const handleEditPromotion = async (e) => {
+		e.preventDefault();
+		const inputEdit = {
+			name: eventName,
+			description: eventDescription,
+			products: eventProduct.map((product) => ({
+				product_id: product.value,
+				is_free: product.is_free,
+			})),
+		};
+		try {
+			const response = await axios.put(
+				`${import.meta.env.VITE_API_URL}/promotions/update/${id}`,
+				inputEdit
+			);
+			if (response.status === 200) {
+				// Handle successful update, e.g., show a message or update the state
+				console.log("Promotion updated successfully");
+				updateProduct();
+				closeModal();
+			}
+		} catch (err) {
+			console.log("Can not edit the promotion due" + err.message);
+		}
+	};
 	return (
 		<>
 			<div className="absolute h-max flex justify-center z-10 w-full mt-8">
@@ -56,7 +190,7 @@ export default function EditPromotion({ closeModal, id }) {
 							</svg>
 						</button>
 					</div>
-					<form method="post">
+					<form method="post" onSubmit={handleEditPromotion}>
 						<div className="w-full flex justify-between items-center gap-4">
 							<div className="mb-4 w-full">
 								<label
@@ -68,6 +202,7 @@ export default function EditPromotion({ closeModal, id }) {
 									type="text"
 									name="name"
 									value={eventName}
+									onChange={(e) => setEventName(e.target.value)}
 									className="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500"
 								/>
 							</div>
@@ -82,6 +217,7 @@ export default function EditPromotion({ closeModal, id }) {
 								</label>
 								<input
 									value={eventDescription}
+									onChange={(e) => setEventDescription(e.target.value)}
 									type="text"
 									name="description"
 									className="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500"
@@ -95,6 +231,38 @@ export default function EditPromotion({ closeModal, id }) {
 								className="block text-gray-700 text-sm font-bold mb-2">
 								Select Product
 							</label>
+							<Select
+								value={eventProduct}
+								options={products}
+								isMulti
+								components={{
+									animatedComponents,
+									Option: (props) =>
+										customOption({ ...props, handleCheckboxChange }),
+								}}
+								onChange={handleSelectChange}
+								className="w-full"
+								closeMenuOnSelect={false}
+								getOptionLabel={(option) => (
+									<div className="flex items-center">
+										<img
+											src={option.image}
+											alt={option.label}
+											style={{ width: 50, height: 50, marginRight: 10 }}
+										/>
+										<div>
+											{option.is_free ? (
+												<>
+													<p>{option.label} </p>
+													<span className="text-green-500 ml-2">(Free)</span>
+												</>
+											) : (
+												<p>{option.label} </p>
+											)}
+										</div>
+									</div>
+								)}
+							/>
 						</div>
 
 						<div className="w-full flex justify-between items-center gap-4">

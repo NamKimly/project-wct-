@@ -1,17 +1,22 @@
 import axios from "axios";
 import authToken from "./../../../utils/authToken";
+import {
+	ChartOrderDay,
+	ChartOrderMonth,
+	ChartOrderYear,
+} from "../../../components/AdminComponent/ChartOrder";
 import { useEffect, useState } from "react";
 
 export default function DashBoard() {
 	const [getUser, setGetUser] = useState([]);
 	const [countUser, setCountUser] = useState(null);
 	const [countProduct, setCountProduct] = useState(null);
+	const [countOrder, setCountOrder] = useState(null);
+	const [getTrendProduct, setGetTrendProduct] = useState(null);
+	const token = authToken();
 
 	//*Count total users
 	useEffect(() => {
-		//* Getting Token from storing of each user by this only for admin
-		const token = authToken();
-
 		if (!token) {
 			console.error("No token found. User is not authorized.");
 			return;
@@ -23,25 +28,71 @@ export default function DashBoard() {
 					Authorization: `Bearer ${token}`,
 				},
 			});
-			const amountUser = users.data.users.length;
-			setGetUser(users.data.users);
-			setCountUser(amountUser);
+			const amountUser = users.data.users;
+			const customerUsers = amountUser.filter((user) => user.role !== "admin");
+			setGetUser(customerUsers);
+			setCountUser(customerUsers.length);
 		};
 		handleGetUser();
-	}, []);
+	}, [token]);
 
 	//* Count total products
 	useEffect(() => {
 		const handleGetProduct = async () => {
-			const products = await axios.get(
-				`${import.meta.env.VITE_API_URL}/products`
-			);
-			const amountProduct = products.data.product.length;
-			setCountProduct(amountProduct);
+			try {
+				const products = await axios.get(
+					`${import.meta.env.VITE_API_URL}/products`
+				);
+				const amountProduct = products.data.product.length;
+				setCountProduct(amountProduct);
+			} catch (err) {
+				console.log("Could not get product" + err.message);
+			}
 		};
 		handleGetProduct();
 	}, []);
 
+	useEffect(() => {
+		if (!token) {
+			console.error("No token found. User is not authorized.");
+			return;
+		}
+		const handleGetOrder = async () => {
+			try {
+				const orders = await axios.get(
+					`${import.meta.env.VITE_API_URL}/orders/approve/detail`,
+					{
+						headers: {
+							Accept: `application/json`,
+							Authorization: `Bearer ${token}`,
+						},
+					}
+				);
+				setCountOrder(orders.data.orders.length);
+				console.log(orders.data.message);
+			} catch (err) {
+				console.log("Could not get order" + err.message);
+			}
+		};
+		handleGetOrder();
+	}, [token]);
+
+	//* Get Trending Product
+	useEffect(() => {
+		const trendProduct = async () => {
+			try {
+				const orders = await axios.get(
+					`${import.meta.env.VITE_API_URL}/orders/trending-products`
+				);
+				setGetTrendProduct(orders.data.trending_products);
+				console.log(orders.data.message);
+			} catch (err) {
+				console.log("Could not get order" + err.message);
+			}
+		};
+		trendProduct();
+	}, [token]);
+	console.log(getTrendProduct);
 	return (
 		<>
 			<div className="mt-12">
@@ -70,12 +121,6 @@ export default function DashBoard() {
 								{countProduct ? countProduct : 0}
 							</h4>
 						</div>
-						<div className="border-t border-blue-gray-50 p-4">
-							<p className="block antialiased font-sans text-base leading-relaxed font-normal text-blue-gray-600">
-								<strong className="text-green-500">+55%</strong>&nbsp;than last
-								week
-							</p>
-						</div>
 					</div>
 					<div className="relative flex flex-col bg-clip-border rounded-xl bg-white text-gray-700 shadow-md">
 						<div className="bg-clip-border mx-4 rounded-xl overflow-hidden bg-gradient-to-tr from-pink-600 to-pink-400 text-white shadow-pink-500/40 shadow-lg absolute -mt-4 grid h-16 w-16 place-items-center">
@@ -96,14 +141,8 @@ export default function DashBoard() {
 								Total Order
 							</p>
 							<h4 className="block antialiased tracking-normal font-sans text-2xl font-semibold leading-snug text-blue-gray-900">
-								2,300
+								{countOrder ? countOrder : 0}
 							</h4>
-						</div>
-						<div className="border-t border-blue-gray-50 p-4">
-							<p className="block antialiased font-sans text-base leading-relaxed font-normal text-blue-gray-600">
-								<strong className="text-green-500">+3%</strong>&nbsp;than last
-								month
-							</p>
 						</div>
 					</div>
 					<div className="relative flex flex-col bg-clip-border rounded-xl bg-white text-gray-700 shadow-md">
@@ -125,12 +164,6 @@ export default function DashBoard() {
 								{countUser ? countUser : 0}
 							</h4>
 						</div>
-						<div className="border-t border-blue-gray-50 p-4">
-							<p className="block antialiased font-sans text-base leading-relaxed font-normal text-blue-gray-600">
-								<strong className="text-red-500">-2%</strong>&nbsp;than
-								yesterday
-							</p>
-						</div>
 					</div>
 					<div className="relative flex flex-col bg-clip-border rounded-xl bg-white text-gray-700 shadow-md">
 						<div className="bg-clip-border mx-4 rounded-xl overflow-hidden bg-gradient-to-tr from-orange-600 to-orange-400 text-white shadow-orange-500/40 shadow-lg absolute -mt-4 grid h-16 w-16 place-items-center">
@@ -145,23 +178,38 @@ export default function DashBoard() {
 						</div>
 						<div className="p-4 text-right">
 							<p className="block antialiased font-sans text-sm leading-normal font-normal text-blue-gray-600">
-								Sales
+								Trend Product
 							</p>
-							<h4 className="block antialiased tracking-normal font-sans text-2xl font-semibold leading-snug text-blue-gray-900">
-								$103,430
-							</h4>
-						</div>
-						<div className="border-t border-blue-gray-50 p-4">
-							<p className="block antialiased font-sans text-base leading-relaxed font-normal text-blue-gray-600">
-								<strong className="text-green-500">+5%</strong>&nbsp;than
-								yesterday
-							</p>
+							<div className="mt-2block antialiased tracking-normal font-sans text-2xl font-semibold leading-snug text-blue-gray-900">
+								{getTrendProduct &&
+									getTrendProduct.map((item) => (
+										<div
+											key={item.id}
+											className="flex justify-end items-center gap-2">
+											<img
+												className="block antialiased w-16 h-16"
+												src={item.product.images}
+												alt={item.name}
+											/>
+											<p className="block antialiased font-sans text-sm leading-normal font-normal text-blue-gray-600">
+												{item.product.name}
+											</p>
+										</div>
+									))}
+							</div>
 						</div>
 					</div>
 				</div>
 
+				{/** Chart*/}
+				<div className="flex flex-wrap justify-start items-center gap-x-12">
+					<ChartOrderDay />
+					<ChartOrderMonth />
+					<ChartOrderYear />
+				</div>
+
 				{/** User Table*/}
-				<div className="shadow-lg rounded-lg overflow-hidden">
+				<div className="shadow-lg rounded-lg overflow-hidden mt-12	">
 					<table className="w-full table-fixed">
 						<thead>
 							<tr className="bg-gray-100">

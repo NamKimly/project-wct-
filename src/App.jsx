@@ -18,13 +18,16 @@ import ProductCrud from "./views/pages/admin/ProductCrud";
 import AdminProfile from "./views/pages/admin/AdminProfile";
 import AddingCategory from "./views/pages/admin/AddingCategory";
 import CartDetail from "./components/CartDetail";
-import HistoryOrder from "./views/pages/admin/HistoryOrder";
+import HistoryOrder from "./views/pages/HistoryOrder";
 import Protected from "./utils/Protected";
 import UserProfile from "./views/pages/UserProfle";
 import ProductByBrand from "./views/pages/ProductByBrand";
 import ProductByCategory from "./views/pages/ProductByCategory";
 import PromotionDetail from "./views/pages/PromtionDetail";
 import Promotion from "./views/pages/admin/Promotion";
+import Success from "./views/pages/Payment/Success";
+import Cancel from "./views/pages/Payment/Cancel";
+import TermCondition from "./components/AdminComponent/TermCondition";
 import {
 	ProtectedRouteAdmin,
 	ProtectedRouteUser,
@@ -60,6 +63,7 @@ export default function App() {
 				<Route element={<AppLayout />}>
 					<Route path="*" element={<PageNotFound />} />
 					<Route path="/" element={<Home />} />
+					<Route path="/term_condition" element={<TermCondition />} />
 
 					<Route path="/shop" element={<Shopping />} />
 
@@ -87,6 +91,8 @@ export default function App() {
 						<Route path="/payment" element={<Payment />} />
 						<Route path="/history_order" element={<HistoryOrder />} />
 						<Route path="/user_profile" element={<UserProfile />} />
+						<Route path="/payment/success" element={<Success />} />
+						<Route path="/payment/cancel" element={<Cancel />} />
 					</Route>
 				</Route>
 

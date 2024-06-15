@@ -1,9 +1,27 @@
 import axios from "axios";
 import { useState, useEffect, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
+import { ToastContainer, toast, Bounce } from "react-toastify";
+import authToken from "../../utils/authToken";
+import "react-toastify/dist/ReactToastify.css";
+
+const notify = () => {
+	toast.success("Your Item has been added to cart", {
+		position: "top-right",
+		autoClose: 5000,
+		hideProgressBar: false,
+		closeOnClick: true,
+		pauseOnHover: true,
+		draggable: true,
+		progress: undefined,
+		theme: "colored",
+		transition: Bounce,
+	});
+};
 
 export default function PromotionDetail() {
 	const { promotionID } = useParams();
+	const token = authToken();
 	const [promotion, setPromotion] = useState([]);
 	const [products, setProducts] = useState([]);
 
@@ -23,8 +41,45 @@ export default function PromotionDetail() {
 		fetchPromotionById();
 	}, [fetchPromotionById]);
 
+	const handleCartPromotion = async () => {
+		const inputPromotionToCart = {
+			promotion_id: parseInt(promotionID),
+		};
+		try {
+			const request = await axios.post(
+				`${import.meta.env.VITE_API_URL}/cart/promotion`,
+				inputPromotionToCart,
+				{
+					headers: {
+						Accept: `application/json`,
+						Authorization: `Bearer ${token}`,
+					},
+				}
+			);
+			if (request.status === 200) {
+				console.log(
+					"The promotion has been successfully added to cart" +
+						request.data.promotion
+				);
+			}
+		} catch (err) {
+			console.log("Can not add this promotion to cart" + err.message);
+		}
+	};
 	return (
 		<section className="py-12 sm:py-16">
+			<ToastContainer
+				position="top-right"
+				autoClose={5000}
+				hideProgressBar={false}
+				newestOnTop={false}
+				closeOnClick
+				rtl={false}
+				pauseOnFocusLoss
+				draggable
+				pauseOnHover
+				theme="colored"
+			/>
 			<div className="container mx-auto px-4">
 				<div className="flex justify-center items-center flex-col lg:col-span-2 lg:row-span-3 lg:row-end-2">
 					<h1 className="sm: text-2xl font-bold text-gray-900 sm:text-3xl">
@@ -49,12 +104,20 @@ export default function PromotionDetail() {
 					</div>
 
 					<div className="flex justify-center mt-8 items-center gap-4">
-						<button className="px-4 py-2 w-[8rem]  text-center font-semibold text-violet-600 border border-violet-600 rounded hover:bg-violet-600 hover:text-white active:bg-indigo-500 focus:outline-none focus:ring">
+						<button
+							onClick={() => {
+								notify();
+								handleCartPromotion();
+							}}
+							className="px-4 py-2 w-[8rem]  text-center font-semibold text-violet-600 border border-violet-600 rounded hover:bg-violet-600 hover:text-white active:bg-indigo-500 focus:outline-none focus:ring">
 							Add to Cart
 						</button>
-						<button className="flex justify-center w-[8rem] bg-red-500 hover:bg-red-600 font-semibold text-white border-0 py-2 px-4 focus:outline-none rounded ">
+						<Link
+							to={"/cart_detail"}
+							onClick={handleCartPromotion}
+							className="flex justify-center w-[8rem] bg-red-500 hover:bg-red-600 font-semibold text-white border-0 py-2 px-4 focus:outline-none rounded ">
 							Buy Now
-						</button>
+						</Link>
 					</div>
 
 					<ul className="mt-8 space-y-2">
@@ -126,7 +189,14 @@ export default function PromotionDetail() {
 									</p>
 									<div className="flex mt-4 w-full justify-between items-center gap-4">
 										<p className="block font-sans text-lg text-red-500 antialiased font-semibold leading-relaxed text-inherit">
-											${item.price}
+											{item.pivot.is_free === 1 ? (
+												<div className="flex justify-start items-center gap-2">
+													<del className="text-sm"> ${item.price}</del>
+													<p className="text-sm text-red-500">Free</p>
+												</div>
+											) : (
+												<> ${item.price}</>
+											)}
 										</p>
 										<Link
 											className="flex justify-center items-center"

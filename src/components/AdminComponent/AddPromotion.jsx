@@ -20,7 +20,7 @@ const customOption = (props) => {
 				/>
 				{data.label}
 			</div>
-			<label className="relative flex items-center p-2 rounded-full cursor-pointer">
+			<label className="relative flex items-center gap-2 p-2 rounded-full cursor-pointer">
 				<input
 					type="checkbox"
 					name="productLastest"
@@ -47,24 +47,13 @@ const customOption = (props) => {
 	);
 };
 
-const customSingleValue = ({ data }) => (
-	<div className="custom-single-value">
-		<img
-			src={data.image}
-			alt={data.label}
-			loading="lazy"
-			style={{ width: 50, height: 50, marginRight: 10 }}
-		/>
-		{data.label}
-	</div>
-);
-
 export default function AddPromotion({ closeModal, updateProduct }) {
 	const [products, setProducts] = useState([]);
 	const [eventName, setEventName] = useState("");
 	const [eventDescription, setEventDescription] = useState("");
 	const [promotionProduct, setPromotionProduct] = useState([]);
 
+	// Fetch products from the API
 	const getProduct = useCallback(async () => {
 		const response = await axios.get(
 			`${import.meta.env.VITE_API_URL}/products`
@@ -76,14 +65,21 @@ export default function AddPromotion({ closeModal, updateProduct }) {
 			is_free: false,
 		}));
 		setProducts(formattedProducts);
-		updateProduct();
-	}, [updateProduct]);
+	}, []);
 
 	useEffect(() => {
 		getProduct();
 	}, [getProduct]);
 
+	// Handle selection change for products
 	const handleCheckboxChange = (selectedProduct) => {
+		setProducts((prevProducts) =>
+			prevProducts.map((product) =>
+				product.value === selectedProduct.value
+					? { ...product, is_free: !product.is_free }
+					: product
+			)
+		);
 		setPromotionProduct((prevProducts) =>
 			prevProducts.map((product) =>
 				product.value === selectedProduct.value
@@ -93,10 +89,27 @@ export default function AddPromotion({ closeModal, updateProduct }) {
 		);
 	};
 
+	// Handle product selection
 	const handleSelectChange = (selectedOptions) => {
-		setPromotionProduct(selectedOptions || []);
-	};
+		const selectedValues = selectedOptions || [];
 
+		// Update products to reset `is_free` state if a product is deselected
+		setProducts((prevProducts) =>
+			prevProducts.map((product) =>
+				selectedValues.find((selected) => selected.value === product.value)
+					? product
+					: { ...product, is_free: false }
+			)
+		);
+
+		// Update promotionProduct state
+		const updatedPromotionProduct = products.filter((product) =>
+			selectedValues.some((selected) => selected.value === product.value)
+		);
+
+		setPromotionProduct(updatedPromotionProduct);
+	};
+	// Handle promotion submission
 	const handleAddPromotion = async (e) => {
 		e.preventDefault();
 
@@ -118,6 +131,7 @@ export default function AddPromotion({ closeModal, updateProduct }) {
 			setEventName("");
 			setEventDescription("");
 			setPromotionProduct([]);
+			updateProduct();
 			closeModal();
 		} catch (err) {
 			console.log(err.message);
@@ -189,8 +203,7 @@ export default function AddPromotion({ closeModal, updateProduct }) {
 									className="block text-gray-700 text-sm font-bold mb-2">
 									Event Description
 								</label>
-								<input
-									type="text"
+								<textarea
 									name="description"
 									onChange={(e) => setEventDescription(e.target.value)}
 									value={eventDescription}
@@ -199,37 +212,52 @@ export default function AddPromotion({ closeModal, updateProduct }) {
 							</div>
 						</div>
 
-						<div className="mb-4 w-full">
+						<div className="mb-4">
 							<label
 								htmlFor="products"
 								className="block text-gray-700 text-sm font-bold mb-2">
-								Select Product
+								Select Products
 							</label>
 							<Select
-								id="products"
-								name="products"
-								options={products}
 								isMulti
-								closeMenuOnSelect={false}
+								value={promotionProduct}
+								options={products}
 								components={{
 									animatedComponents,
 									Option: (props) =>
 										customOption({ ...props, handleCheckboxChange }),
-									SingleValue: customSingleValue,
 								}}
 								onChange={handleSelectChange}
-								value={promotionProduct}
+								classcName="w-full"
+								closeMenuOnSelect={false}
+								getOptionLabel={(option) => (
+									<div className="flex items-center">
+										<img
+											src={option.image}
+											alt={option.label}
+											style={{ width: 50, height: 50, marginRight: 10 }}
+										/>
+										<div>
+											{option.is_free ? (
+												<>
+													<p>{option.label} </p>
+													<span className="text-green-500 ml-2">(Free)</span>
+												</>
+											) : (
+												<p>{option.label} </p>
+											)}
+										</div>
+									</div>
+								)}
 							/>
 						</div>
 
-						<div className="w-full flex justify-between items-center gap-4">
-							<div className="w-full">
-								<button
-									type="submit"
-									className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600">
-									Add Promotion
-								</button>
-							</div>
+						<div className="flex justify-end">
+							<button
+								type="submit"
+								className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+								Add Promotion
+							</button>
 						</div>
 					</form>
 				</div>

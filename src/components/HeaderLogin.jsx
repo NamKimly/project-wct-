@@ -1,4 +1,5 @@
 import Cart from "./../components/Cart";
+import Mailing from "../views/pages/Mailing";
 import axios from "axios";
 import { useState, useEffect, useCallback } from "react";
 import { Dialog, Popover } from "@headlessui/react";
@@ -7,16 +8,20 @@ import { logout } from "./../app/slice";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getCurrentUser } from "./../app/slice";
+import authToken from "../utils/authToken";
 
 export default function HeaderLogin() {
 	//* Get JWT token
-	let token = localStorage.getItem("token") ?? "";
-	token = token.replace(/"/g, "");
+	const token = authToken();
+	const localCartItems = JSON.parse(localStorage.getItem("cart_items")) || [];
 
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 	const [openCart, setOpenCart] = useState(false);
+	const [openMail, setOpenMail] = useState(false);
+
 	const [isOpen, setIsOpen] = useState(false);
 	const [cartQuantity, setCartQuantity] = useState(null);
+	const [mail, setMail] = useState(null);
 	const dispatch = useDispatch();
 
 	//* Access currentUser from the auth slice via token
@@ -33,9 +38,11 @@ export default function HeaderLogin() {
 	const handleCart = () => {
 		setOpenCart(!openCart);
 	};
+	const handleMail = () => {
+		setOpenMail(!openMail);
+	};
 
 	//* Get the Cart quantity
-
 	const fetchCart = useCallback(async () => {
 		try {
 			const response = await axios.get(`${import.meta.env.VITE_API_URL}/cart`, {
@@ -54,11 +61,39 @@ export default function HeaderLogin() {
 		fetchCart();
 	}, [fetchCart]);
 
+	const fetchPedingOrder = useCallback(async () => {
+		try {
+			const response = await axios.get(
+				`${import.meta.env.VITE_API_URL}/orders/user/${currentUser?.id}`,
+				{
+					headers: {
+						Accept: "application/json",
+						Authorization: `Bearer ${token}`,
+					},
+				}
+			);
+			const getOrder = response.data.orders;
+			const pendingOrders = getOrder.filter(
+				(order) => order.status === "pending"
+			);
+			const numberOfPendingOrder = pendingOrders.length;
+			setMail(numberOfPendingOrder);
+		} catch (err) {
+			console.log(err.message);
+		}
+	}, [token, currentUser?.id]);
+
+	useEffect(() => {
+		fetchPedingOrder();
+	}, [fetchPedingOrder]);
+
 	const handleCartUpdate = useCallback(() => {
 		fetchCart();
-	}, [fetchCart]);
+	}, []);
 
-	console.log(cartQuantity);
+	const handleMailUpdate = useCallback(() => {
+		fetchPedingOrder();
+	}, []);
 
 	return (
 		<header className="navbar bg-white  mb-8">
@@ -85,7 +120,7 @@ export default function HeaderLogin() {
 					</button>
 				</div>
 
-				<Popover.Group className="hidden lg:flex lg:gap-x-16  justify-center items-center">
+				<Popover.Group className="hidden lg:flex lg:gap-x-12  justify-center items-center">
 					<Link to={"/"} className="text-sm font-semibold leading-6 text-black">
 						Home
 					</Link>
@@ -127,12 +162,16 @@ export default function HeaderLogin() {
 							required
 						/>
 					</div>
-					<div className="flex justify-center items-center">
+					<div className="flex justify-center items-center gap-4">
 						<a
 							href="#"
 							className="flex justify-center items-center text-sm font-semibold leading-6 text-black">
 							<div className="text-center bg-red-500 w-4 text-white text-xs rounded-full">
-								{cartQuantity > 0 && cartQuantity}
+								{cartQuantity > 0 ? (
+									<p> {cartQuantity}</p>
+								) : (
+									<p> {localCartItems.length}</p>
+								)}
 							</div>
 							<i
 								onClick={handleCart}
@@ -144,6 +183,17 @@ export default function HeaderLogin() {
 						</a>
 						{openCart && currentUser?.role !== "admin" && (
 							<Cart onCartUpdate={handleCartUpdate} />
+						)}
+					</div>
+					<div className="flex justify-center items-center">
+						<div className="text-center bg-red-500 w-4 text-white text-xs rounded-full">
+							{mail > 0 && <p>{mail}</p>}
+						</div>
+						<i
+							onClick={handleMail}
+							className="fa-solid fa-envelope text-lg cursor-pointer"></i>
+						{openMail && currentUser?.role !== "admin" && (
+							<Mailing onMailUpdate={handleMailUpdate} />
 						)}
 					</div>
 					<div className="flex justify-center items-center">

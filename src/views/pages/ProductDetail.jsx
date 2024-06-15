@@ -7,6 +7,22 @@ import RelatedProduct from "../../components/RelatedProduct";
 import { finalPrice } from "././../../utils/DiscountFunction";
 import authToken from "../../utils/authToken";
 import getCurrentUser from "./../../utils/getCurrentUser";
+import { ToastContainer, toast, Bounce } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+const notify = () => {
+	toast.success("Your Item has been added to cart", {
+		position: "top-right",
+		autoClose: 5000,
+		hideProgressBar: false,
+		closeOnClick: true,
+		pauseOnHover: true,
+		draggable: true,
+		progress: undefined,
+		theme: "colored",
+		transition: Bounce,
+	});
+};
 
 export default function ProductDetail() {
 	//* Get token
@@ -119,6 +135,18 @@ export default function ProductDetail() {
 
 	return (
 		<>
+			<ToastContainer
+				position="top-right"
+				autoClose={5000}
+				hideProgressBar={false}
+				newestOnTop={false}
+				closeOnClick
+				rtl={false}
+				pauseOnFocusLoss
+				draggable
+				pauseOnHover
+				theme="colored"
+			/>
 			<section className="flex justify-center items-center text-gray-700 body-font flex-col bg-white">
 				<nav className="flex justify-center items-center ml-12 p-4">
 					<ol className="flex items-center">
@@ -318,7 +346,10 @@ export default function ProductDetail() {
 
 								<div className="flex justify-center items-center gap-4">
 									<button
-										onClick={() => handleAddToCart(getProductId.id)}
+										onClick={() => {
+											notify();
+											handleAddToCart(getProductId.id);
+										}}
 										to={currentUser?.role !== "admin" ? "/payment" : "#"}
 										className={`${
 											currentUser?.role === "admin"

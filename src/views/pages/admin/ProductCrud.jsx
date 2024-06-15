@@ -139,7 +139,7 @@ export default function ProductCrud() {
 						</div>
 					</div>
 				</td>
-				<td className="w-max p-4 border-b border-blue-gray-50">
+				<td className="w-max p-4 border-b border-blue-gray-50 ">
 					<p className="block w-full antialiased font-sans text-sm leading-normal text-blue-gray-900 font-normal">
 						{product.description}
 					</p>
@@ -189,6 +189,7 @@ export default function ProductCrud() {
 		));
 	}, [filteredProducts, toggleModal, setGetId]);
 
+	console.log(filteredProducts);
 	return (
 		<>
 			{modalState.isOpen && (

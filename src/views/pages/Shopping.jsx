@@ -6,7 +6,22 @@ import getCurrentUser from "./../../utils/getCurrentUser";
 import authToken from "./../../utils/authToken";
 import DisplayLoading from "../../components/DisplayLoading";
 import axios from "axios";
+import { ToastContainer, toast, Bounce } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
+const notify = () => {
+	toast.success("Your Item has been added to cart", {
+		position: "top-right",
+		autoClose: 5000,
+		hideProgressBar: false,
+		closeOnClick: true,
+		pauseOnHover: true,
+		draggable: true,
+		progress: undefined,
+		theme: "colored",
+		transition: Bounce,
+	});
+};
 //* Main rendering
 export default function Shopping() {
 	//* Get token
@@ -205,7 +220,10 @@ export default function Shopping() {
 				</div>
 				<div className="flex justify-between items-center p-6 pt-0">
 					<button
-						onClick={() => addToCart(product.id)}
+						onClick={() => {
+							notify();
+							addToCart(product.id);
+						}}
 						disabled={currentUser?.role == "admin"}
 						className={`${
 							currentUser?.role === "admin"
@@ -229,7 +247,7 @@ export default function Shopping() {
 	return (
 		<>
 			<div className="flex gap-20">
-				<div className="flex flex-col shadow-2xl gap-8 p-8 ml-8 w-1/6 mb-8">
+				<div className="flex flex-col shadow-2xl gap-8 p-8 ml-8 w-1/6 h-max	mb-8">
 					<div className="filter-1 flex flex-col items-start justify-start gap-2">
 						<div>
 							<input
@@ -365,21 +383,6 @@ export default function Shopping() {
 							<input
 								id="default-radio-1"
 								type="checkbox"
-								value=""
-								name="default-radio"
-								className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 "
-							/>
-							<label
-								htmlFor="default-radio-1"
-								className="ms-2 text-md font-medium text-black">
-								Popular
-							</label>
-						</div>
-
-						<div>
-							<input
-								id="default-radio-1"
-								type="checkbox"
 								checked={selectedLatest}
 								onChange={() => setSelectedLatest(!selectedLatest)}
 								name="default-radio"
@@ -396,6 +399,18 @@ export default function Shopping() {
 					{/* */}
 				</div>
 				<div className="flex justify-start items-start">
+					<ToastContainer
+						position="top-right"
+						autoClose={5000}
+						hideProgressBar={false}
+						newestOnTop={false}
+						closeOnClick
+						rtl={false}
+						pauseOnFocusLoss
+						draggable
+						pauseOnHover
+						theme="colored"
+					/>
 					<div className="container mx-auto flex gap-8 flex-wrap max-w-2xl px-2 lg:max-w-7xl">
 						{products && products.length > 0 ? (
 							memoizedProducts

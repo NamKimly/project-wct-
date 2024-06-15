@@ -1,4 +1,3 @@
-/* eslint-disable no-mixed-spaces-and-tabs */
 import authToken from "./../utils/authToken";
 import getCurrentUser from "./../utils/getCurrentUser";
 import axios from "axios";
@@ -32,7 +31,7 @@ export default function Cart({ onCartUpdate }) {
 			setTotalPrice(response.data.cart.totalCartPrice);
 			onCartUpdate();
 		} catch (err) {
-			console.error("Error fetching cart:", err.message);
+			console.error(err.message);
 		}
 	}, [token, onCartUpdate]);
 
@@ -80,11 +79,9 @@ export default function Cart({ onCartUpdate }) {
 					);
 					console.log(response.data);
 				}
+				localStorage.removeItem("cart_items");
 			} catch (err) {
-				console.error(
-					"Error adding items from local storage to cart:",
-					err.message
-				);
+				console.error(err.message);
 			}
 		};
 
@@ -209,7 +206,6 @@ export default function Cart({ onCartUpdate }) {
 			setTotalPrice(newTotalPrice);
 		}
 	};
-
 	return (
 		<Transition.Root show={open} as={Fragment}>
 			<Dialog as="div" className="relative z-10" onClose={setOpen}>
@@ -279,20 +275,14 @@ export default function Cart({ onCartUpdate }) {
 																				</h3>
 																				{item?.product ? (
 																					<div className="flex justify-center items-center gap-1">
-																						{item?.product.discount && (
+																						{item?.product?.discount
+																							?.percentage ? (
 																							<p className="ml-4 text-red-500">
 																								(Discounted)
 																							</p>
-																						)}
+																						) : null}
 
-																						<p
-																							className={
-																								item?.product.discount
-																									? "text-red-500"
-																									: "text-black"
-																							}>
-																							${item.final_price}
-																						</p>
+																						<p>${item.final_price}</p>
 																					</div>
 																				) : (
 																					<div className="flex justify-center items-center">
@@ -305,8 +295,8 @@ export default function Cart({ onCartUpdate }) {
 																									<p className="text-red-500">
 																										{finalPrice(
 																											item.price,
-																											item.discount.percentage
-																										)}
+																											item?.discount?.percentage
+																										) ?? null}
 																									</p>
 																								</div>
 																							) : (
@@ -388,12 +378,12 @@ export default function Cart({ onCartUpdate }) {
 											<div className="mt-6">
 												<Link
 													to={`${
-														currentUser && currentUser.role == "cumstomer"
+														currentUser && currentUser.role == "customer"
 															? "/cart_detail"
 															: "/login"
 													} `}
 													className="flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700">
-													Checkout
+													View Cart
 												</Link>
 											</div>
 											<div className="mt-6 flex justify-center text-center text-sm gap-2 text-gray-500">
